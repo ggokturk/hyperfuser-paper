@@ -6,6 +6,7 @@
 \usepackage{multirow}
 \usepackage{amssymb}
 \usepackage{algorithm}
+\usepackage{subfig}
 \usepackage[noend]{algpseudocode}
 \renewcommand{\algorithmicrequire}{\textbf{Input:~}}
 \renewcommand{\algorithmicensure}{\textbf{Output:~}}
@@ -94,7 +95,7 @@ Many heuristics and proxy methods have been proposed in the literature~\cite{Mix
 
 We denoted $G = (V,E)$ as a directed graph where the $n$ vertices in $V$ represent the agents, and $m$ edges in $E$ represent the relations between the agents in $V$.
 The neighborhood of a vertex $u \in V$ is denoted as $\Gamma_G(v) = \{v: (u,v) \in E\}$. 
-A graph $G' = (V',E')$ is a subgraph of $G$ if $V' \subseteq V$ and $E' \subseteq E$. 
+A graph $G' = (V',E')$ is a sub-graph of $G$ if $V' \subseteq V$ and $E' \subseteq E$. 
 Diffusion probability on edge $(u, v) \in G$ is noted as $w_{u,v}$.
 $w_{u,v}$ can be determined either by the diffusion model or according to the strength of $u$ and $v$'s relationship in the data.
 
@@ -121,11 +122,12 @@ $w_{u,v}$ can be determined either by the diffusion model or according to the st
 \hline\hline
         %$p$             & Sampling probability for edges\\
 %        $P(s,v)_r $     & Random probability generated for selecting edge vertices $s$ to $v$ in simulation $r$\\
+        $X_{r..n}$      & Slice of Vector X between r and r+n(not including)\\
         $h(u,v)$        & Hash function for edge $\{u,v\}$\\
         $h_{max}$       & Maximum value hash function $h$ can return\\
         %$X_r$           & Random number/hash generated for simulation $r$  \\
         \hline\hline
-        $B$             & Batch size, number of simultaneous simulations ran.\\
+        $B$             & Batch size\\
         $e$             & Estimated reachability set size\\
         % $[a, \ldots, a]_B$      & Vector of size $B$, contains all $a$\\
         $M_u[j]$        & Sketch $j$th register for vertex $u$\\
@@ -147,9 +149,9 @@ graph for which the weights on the edges are diffusion/influence probabilities.
 \begin{figure}[!ht] 
     \centering
   \subfloat[\small{IC}\label{fig:ic}]{%
-       \includegraphics[width=0.45\linewidth]{ic-dif.png}}
+       \includegraphics[width=0.45\linewidth]{./images/ic-dif.png}}
   \subfloat[\small{WC}\label{fig:wc}]{%
-        \includegraphics[width=0.45\linewidth]{wc-dif.png}}
+        \includegraphics[width=0.45\linewidth]{./images/wc-dif.png}}
     \\% IMAGES HERE
   \caption{\protect\subref{fig:ic} 
 The directed graph $G = (V, E)$ for Independent Cascade with independent diffusion probabilities. 
@@ -171,21 +173,39 @@ The methods based on Reverse reachability and Bottom-Up Traversal, utilizes this
 MixGreedy method goes one step further; it utilizes that all vertices in a connected component that have the same reachability set in undirected graphs. So that, for a sample graph, all reachability sets can be found in single graph traversal. 
 
 For directed graphs, storing reachability sets for all vertices and merging these sets are infeasible for non-trivial graphs. 
-% If one-hot vectors are used to store reachability sets for constant insertion time, $O(n^2\mathcal{R})$ bits of memory is required and each merge operation has $O(n)$ time complexity. 
+If one-hot vectors are used to store reachability sets for constant insertion time, $O(n^2\mathcal{R})$ bits of memory is required and each merge operation has $O(n)$ time complexity. 
 if Disjoints sets are used for storing reachability sets; $(n\bar{\sigma}\mathcal{R})$ memory is required to store all reachability sets, and each merge operation has $O(ackermann'(\sigma))$ complexity.
 
-Count-distinct sketches have nice properties for such problems; Flajolet–Martin algorithm can estimate cardinality of distinct elements in reachability sets with constant number of registers($M$), and most importantly union of these sets can be done in constant number of operations.
+Count-distinct sketches have nice properties for such problems; Flajolet–Martin algorithm\cite{flajolet1985probabilistic} can estimate cardinality of distinct elements in reachability sets with constant number of registers($M$), and most importantly union of these sets can be done in constant number of operations.
 
-Flajolet–Martin sketch only stores how rare elements are in a multi-set.Rarity of the elements are often computed by counting leading zeros in item's hash values. Items are added by storing longest leading zero count. Cardinality estimation can be done by taking 2 to the power of the stored value. Multiple registers, $M[j]$, are commonly used to reduce variance, average of longest running zeros can be used compute the cardinality and the result is divided to correction factor $\phi \approx 0.77351$ to correct hash collisions.
+Flajolet–Martin sketch only stores how rare elements are in a multi-set.Rarity of the elements are often computed by counting leading zeros in item's hash values.  The registers are initialized with zero values in begining. Items are added by storing longest leading zero count. Cardinality estimation can be done by taking 2 to the power of the stored value. Multiple registers and hash functions, $M[j]$ and $h_j$, are commonly used to reduce variance.
+Adding item $x$ to register $M$, and its result $M'$ is shown in equation~\ref{eq:sketch-add}.
 
-The merge operation for two sketches, $M_u$,$M_v$, can be performed by computing the pairwise maximum of the registers; $M[j] = max(M_u[j],M_v[j]) ~ \forall j\in(0,J]$
+\begin{equation}
+    \label{eq:sketch-add}
+    M'[j] = max(M[j],clz(h_j(x)) ~ \forall j\in(0,J]
+\end{equation} where $clz$ is count leading zeros function and $J$ is number of sketch registers.
+
+The merge operation for two sketches, $M_u$,$M_v$, can be performed by computing the pairwise maximum of the registers. Formally; 
+\begin{equation}
+    \label{eq:sketch-merge}
+    M'[j] = max(M_u[j],M_v[j]) ~ \forall j\in(0,J]
+\end{equation} 
+where $M'$ is union of set and $J$ is number of sketch registers.
+
+Average of longest running zeros can be used compute the cardinality and the result is divided to correction factor $\phi \approx 0.77351$ to correct hash collisions.
+\begin{equation}
+    \label{eq:sketch-estimate}
+    e = 2^{\bar{M}}/\phi
+\end{equation} 
+where $e$ distinct cardinality and $\bar{M}$ is M's registers mean.
 
 In this work, we utilize a variant of Flajolet–Martin sketch; since multiple Monte-Carlo simulations are performed to calculate estimated influence, we use one register per simulation, and take average of longest leading zero counts to calculate average cardinality of reachability sets. Also, in an another perspective, it is same as using register as much as MC simulation, where updates are done with same probability as influence propagation. 
 
 
 \subsection{SIMD}
 {\em Single Instruction-Multiple Data} machines exploits data level parallelism to perform the same operation on multiple data points simultaneously. In this work, we utilized Advanced Vector Extensions (AVX2) instruction set. AVX2 works on 256-bit registers in multiple packed forms; 8x32 bit operations are used in fused sampling, where as sketch merge  performed with 32x8bit operations. This dichotomy between operations solved by processing in 32 simulations batches at a time.
-Even-though, auto-vectorization is enabled, most of the operation mention are cannot by vectorized by the used compiler. As far as we know, no compiler vectorizes chain conditional move or move-mask operations. Vectorization in the implementation is done using explicit intrinsics.
+Even-though, auto-vectorization is enabled, most of the operation mention are cannot be vectorized by the compiler. As far as we know, no compiler vectorizes chain conditional move or move-mask operations. Vectorization in the implementation is done using explicit intrinsics.
 
 % First, active edges are checked by generating random values, $P(u,v)_r$. After comparing random values with edge threshold, active edges are store in an 32bit integer as one-hot vector. Then,  
 
@@ -219,7 +239,7 @@ For completeness, the intrinsics explicitly used in this paper are described in 
 
 \section{Method}\label{sec:method}
 
-\subsubsection{Hash-based Fused Sampling}
+\subsection{Hash-based Fused Sampling}
 The probabilistic nature of cascade models requires sampling sub-graphs $\hat{G}$ from $G = (V, E)$ to simulate the diffusion process.  Sampling can be a dominating factor in processing; sampling may demand multiple passes on the graph, if samples are memoized, multiple times of the graph size needs to be stored.
 In this work, samples are not generated explicitly. By using a hash-based, fused sampling, we eliminate the necessity of in-memory creation and storage of the sample sub-graphs.
 While processing an edge, it is considered for all possible samples.
@@ -230,7 +250,7 @@ It is sampled or skipped depending on the outcome of hash based random value. Th
 \end{equation}
 where $||$ is the concatenation operator. 
 
-The {{\sc Murmur3}}~\cite{MurmurHash3} hash function is preferred because of its simplicity, good avalanche behavior and bias$.
+The {{\sc Murmur3}}~\cite{MurmurHash3} hash function is preferred because of its simplicity, good avalanche behavior and bias.
 
 For performance considerations, edge hash values were pre-computed in our work and only existing pairs were considered. The trade-off between extra memory and computation here maybe not be applicable for different architectures and faster/simpler hash functions.
 
@@ -252,25 +272,36 @@ For a given graph $G = (V,E)$, the CDF of a sampling probability $x$ is computed
 
 \begin{figure}[!ht] 
     \centering
-    \includegraphics[width=1\linewidth]{cdf}
+    \includegraphics[width=1\linewidth]{./images/cdf.pdf}
     \caption{Cumulative distribution function of hash-based sampling probabilities on various real-life networks.}
     \label{fig:prob_cdf} 
 \end{figure}
 
 %Traditional implementations sample each edge in $G$ once per simulation and store them to construct a sampled subgraph. n
-Since it is possible to know if the edge traversed whether is in any sample, many memory access overheads are avoided. Only down-side of hash-based fused sampling is that, all probabilities $P(u,v)_r$  should be generated for each edge traversal. Fortunately, this computations are quite fast on modern computing hardware.
+Being able to generate infinitely many samples on-the-fly, allows us to avoid many memory accesses. The only down-side of hash-based fused sampling is that we have to generate all random values,   $P(u,v)_r$, for each edge traversal.  Fortunately, these computations are quite fast on modern computing hardware.
 
 \subsection{Reachability Set Cardinality Estimation}
+A greedy solution to the influence maximization problem requires finding a vertex that maximizes marginal influence gain at each step until the seed set size reaches $K$. And, Single vertex influence estimation is the same problem as the count-distinct problem applied to all sample sub-graphs. So, it is possible to use Count-distinct sketches to estimate influence scores in the greedy method. 
 
-Greedy solution to influence maximization problem requires finding a vertex that maximizes marginal influence gain at each step. Until $K$ vertices are added to the seed set this procedure is repeated. 
-Finding a vertex's influence is distinct element count in all sample sub-graphs. Count-distinct sketch we mentioned in section \ref{sec:sketch} is 
+We propose an influence maximization method, that utilizes the Count-distinct sketch we mentioned in section \ref{sec:sketch} to estimate averages of distinct elements in sample subgraphs for both time and space efficiency. Algorithm \ref{algo:main} describes the method proposed as follows; 
+
+First, reachability sets of all vertices are initialized with vertices themselves. For all vertices $u$, its $j$th register is set to $M_u[j]=clz(h_j(u))$ meaning $R_{\hat{G}_j}(u) = \{u\}$. Then, we perform diffusion process on the sketch registers. 
+
+The diffusion process works as follows; first, all vertices added to live vertices set $L$. Then, incoming edges $(u,v)$ for all live vertices are processed. For all simulation $u$ is live, the sketch of both sides are merged and set to $u$ registers. If any of the sketch-registers change, vertex $u$ added to the next iteration's live vertices set $L'$. After live edges are processed, if the next iteration's live vertices set is smaller than the convergence threshold $\epsilon_c$, the diffusion process concluded. If not, we swap $L$ and $L'$, clear $L'$, and then diffusion processed is repeated. 
+
+In Greedy algorithm\cite{kempe2003maximizing} for each candidate vertex, influence diffusion computations are perform for each vertex.  On the other hand, diffusion on sketch registers allows finding all vertices reachability set. All vertices influence in single step distance only computed once. This dynamic programming like property allows fast selection of influence maximizing candidate.
+
+
+After diffusion, following process is repeated until $K$ vertices are added to the seed set; For all vertex $u$ reachability set cardinalities, $R_G(S\cup u)$, estimated by merging $mask$ and their sketch registers. The $mask$ used for the sketch of $R_G(S)$ and initialized with zeros. Vertex with maximum cardinality is selected to add to the seed set. Then, the actual Monte-Carlo simulations were performed to compute the reachability set of the seed set. Having actual $R_G(S)$ allows both to calculate estimation errors and to find blocked vertices for all simulations. Blocked vertices skipped in the diffusion step in coming iterations. Besides, the real influence score allows us to rebuild our sketch when the sketches have gone stale.
+
+The sketches are assumed as stale if the absolute error in estimated total influence score is more than global threshold, $\epsilon_{g}$, and the marginal gain estimation error after the last sketch larger than local threshold $\epsilon_{l}$. Two threshold values allow the algorithm to rebuild after large local errors but skip rebuilding if the error is minimal in the total score. If a rebuild is not required, only the last added vertex's sketch also merged with $mask$ to update $R_G(S)$. 
 
 
 
 
 \begin{algorithm}
 \caption{\sc{SketchFuser}($G,K,J$)}
-\label{algo:newgredy}
+\label{algo:main}
 \algorithmicrequire{$G = (V,E)$: the influence graph
 \\\hspace*{6.6ex}{$K$: number of seed vertices
 \\\hspace*{6.7ex}$\mathcal{J}$: number of MC simulations}\\}
@@ -302,7 +333,7 @@ Finding a vertex's influence is distinct element count in all sample sub-graphs.
                     \State $M[j]_v \leftarrow clz(hash(v) \oplus hash(j))$ 
                 \EndFor
             \EndFor
-            \State $M \leftarrow simulate(G,M,R_S)$
+            \State $M \leftarrow Simulate(G,M,R_S)$
             \State $mask \leftarrow zeros(J) $ 
             \State $\varsigma \leftarrow \sigma $ 
         \EndIf
@@ -311,9 +342,9 @@ Finding a vertex's influence is distinct element count in all sample sub-graphs.
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}
+\begin{algorithm}[!ht]
 \caption{\sc{Simulate}($G,M,J,R_S$)}
-\label{algo:newgredy}
+\label{algo:diffusion-step}
 \algorithmicrequire{$G = (V,E)$: the influence graph
 \\\hspace*{6.6ex}{$M$: Sketch vectors of vertices
 \\\hspace*{6.7ex}$\mathcal{J}$: number of MC simulations
@@ -341,8 +372,64 @@ Finding a vertex's influence is distinct element count in all sample sub-graphs.
     \EndWhile
 \end{algorithmic}
 \end{algorithm}
+\FloatBarrier
+\subsection{Vectorization and Performance considerations}
+
+Traditional two-step, sample-then-diffuse computation model stores data loosely-coupled. Sampled edges are stored together, diffusion related information stored afar. This way, SIMD operation is allowed on consecutively located edges, requiring random memory accesses for the diffusion process. Even if tightly coupled
+ 
+One of the main advantages of fused sampling is allowing similar simulation data and computations together. 
+Our implementation generates $B/4$ sample edges and runs $B$ simulations at a time. 
+The dichotomy of two batch sizes comes from SIMD width; 
+sampling probabilities are computed in 31-bit fixed-point precision, 
+whereas since we are using 64-bit hash values, sketch registers only require $\left\lceil log2(64+1) \right\rceil = 6$ bits. Aligned to the nearest data type they can fit, sampling probabilities utilizes 8x32-bit operators, where as sketch operations employ 32x8bit SIMD vectors.
 
 
+% \subsubsection{Vectorized edge processing} first loads edge hash and threshold to vector units. Then, we check if the edge is live in any simulations. 8 random values generated by XOR'ing hash vector and X_r
+
+
+\begin{algorithm}
+    \caption{\sc{Vectorized-Merge} ({$u,v,X_r,M_u,M_v,$})}\label{alg:VecLabel}
+    \algorithmicrequire{
+    $u:$ source vertex\\
+    \hspace*{7ex}$v:$ target vertex\\
+    \hspace*{7ex}$X$: random number for simulations\\
+    \hspace*{7ex}$M_u$: sketch registers of $u$\\
+    \hspace*{7ex}$M_v$: sketch registers of $v$\\
+    \hspace*{7ex}$visited$: one-hot visited vector grouped by samples}\\
+    \algorithmicensure{$islive$: a boolean which state if $u$ is live}
+    % \hspace*{8ex}$live_v$: a boolean which state if $v$ is live
+    \begin{algorithmic}[1]
+        \State $islive \leftarrow False$
+        \For{$r \in [0,J)~|~r~mod~32 = 0$}
+            \State $hashvec \leftarrow \_mm256\_set1\_epi32(hash(u,v)$
+            \State $threshold \leftarrow \_mm256\_set1\_epi32(w_{u,v})$
+            \State $live \leftarrow 0$
+            \For{$b\in [0,32)~|~b~mod~8 = 0 $}
+                \State $prob \leftarrow \_mm256\_xor\_si256(X_{r+b\dots8},hashvec)$
+                \State $cmp \leftarrow \_mm256\_cmpgt\_epi32(threshold, prob)$
+                \State $cmpmask \leftarrow \_mm256\_movemask\_ps(cmp))$
+                \State $live\leftarrow (cmpmask<<b)~|~live $
+                \EndFor
+                \If{$live = 0$}
+                    \State continue
+                \EndIf
+                \State $live \leftarrow live~\&~\sim visited_{r\dots32}[u]$
+                \State $livebytes \leftarrow expand\_bits\_to\_bytes(live)$
+                \State $M' \leftarrow 
+                    \_mm256\_cmpgt\_epi8(M_u[r..32],M_v[r..32])$
+                \State $select \leftarrow \_mm256\_and\_si256(livebytes,M')$
+                \State $\_mm256\_blendv\_epi8(M_u[r..32],M_v[r..32])$
+                % \State $$
+                \State $islive \leftarrow islive~|~  \_mm256\_cmp\_ps(\newline
+                    \hspace*{4em}\_mm256\_setzero\_ps(), \newline
+                    \hspace*{4em}\_mm256\_castsi256\_ps(sel))$
+
+
+                % \State $live \leftarrow live \setminus \bigcup_{} j|u\notin R_{\hat{G}_j} $ 
+            % \EndIf
+        \EndFor
+    \end{algorithmic}
+    \end{algorithm}
 
 \section{Evaluation}\label{sec:evaluation}
 
@@ -364,5 +451,3 @@ His current research interests include Parallel Programming, High Performance Co
     \end{IEEEbiography}
 
 \end{document}
-
-
