@@ -29,6 +29,10 @@
 % time skecth diff between us +
 % neden 0.005 +
 % active vertex colors +
+
+% GRID PARAM SEARCH
+% Performance comparison vs others (why slowed down?)
+% Error-Adaptive rebuilding sat
 %%%%%
 \ifCLASSOPTIONcompsoc
   \usepackage[nocompress]{cite}
@@ -266,11 +270,11 @@ For directed graphs, storing reachability sets for all vertices and merging thes
 If one-hot vectors are used to store reachability sets for constant insertion time, $O(n^2\mathcal{R})$ bits of memory is required and each merge operation has $O(n)$ time complexity. 
 if Disjoints sets are used for storing reachability sets; $(n\bar{\sigma}\mathcal{R})$ memory is required to store all reachability sets, and each merge operation has $O(ackermann'(\sigma))$ complexity.
 
-Count-distinct sketches have nice properties for such problems; Flajolet–Martin algorithm\cite{flajolet1985probabilistic} can estimate the cardinality of distinct elements in reachability sets with a constant number of registers($M$), and most importantly union of these sets can be done in a constant number of operations.
+Count-distinct sketches have nice properties for such problems; Flajolet–Martin algorithm\cite{flajolet1985probabilistic} can estimate the cardinality of distinct elements in reachability sets with a constant number of registers($J$), and most importantly union of these sets can be done in a constant number of operations.
 
 
 Flajolet–Martin sketch only stores how rare elements are in a multi-set.The rarity of the elements is often computed by counting leading zeros in the item's hash values.  The registers are initialized with zero values in beginning. Items are added by storing the longest leading zero count. Cardinality estimation can be done by taking 2 to the power of the stored value. Multiple registers and hash functions, $M[j]$ and $h_j$, are commonly used to reduce variance.
-Adding item $x$ to register $M$, and its result $M'$ is shown in equation~\ref{eq:sketch-add}.
+Adding item $x$ to sketch $M$, and its result $M'$ is shown in equation~\ref{eq:sketch-add}.
 
 \begin{equation}
     \label{eq:sketch-add}
@@ -373,7 +377,7 @@ Sampling probability of $(u, v)$ for simulation $r$, $P(u, v)_r$, is computed as
     P(u,v)_r = \frac{X_r \oplus h(u,v)}{h_{max}}.
 \end{equation}
 
-The edge $\{u,v\}$ is verified to be in the sample if ${\rho}(u,v)_r$ is smaller than or equal to the threshold $w_{u,v}$. 
+% The edge $\{u,v\}$ is verified to be in the sample if ${\rho}(u,v)_r$ is smaller than or equal to the threshold $w_{u,v}$. 
 The edge $\{u,v\}$ is exists in the sample $r$ if and only if  ${P}(u,v)_r$ is smaller than the edge threshold $w_{u,v}$. One of the benefits of this approach is, sampling an edge is only single XOR and compare-greater-than operations. Also, the following control flow branch can be removed using conditional move operations. 
 An efficient implementation of this approach will be discussed later in this section.
 \begin{figure}[!ht] 
@@ -415,8 +419,8 @@ After diffusion, the following process is repeated until $K$ vertices are added 
 \subsection{Error-Adaptive Sketch Rebuilding}
 
 Since building sketches with \acro is very fast, we exploit this by rebuilding sketches after observing large cardinality estimation errors.
-After adding vertices to the seed set, \acro perform Monte-Carlo simulations to estimate the reachability of the latent seed set.
-The sketches are assumed as stale if the absolute error in estimated total influence score is more than the global threshold, $\epsilon_{g}$, and the marginal gain estimation error after the last sketch larger than local threshold $\epsilon_{l}$. Before rebuilding stale sketches, the reachability set of latent seed set is marked as visited, and considered blocked in their respective simulations while rebuilding the sketches. Two threshold values allow the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. If a rebuild is not required, only the last added vertex's sketch is also merged with $mask$ to update $R_G(S)$.
+After adding vertices to the seed set, \acro performs Monte-Carlo simulations to estimate the reachability of the latent seed set.
+The sketches are assumed as stale if the absolute error in estimated total influence score is more than the global threshold, $\epsilon_{g}$, and the marginal gain estimation error after the last sketch is larger than local threshold $\epsilon_{l}$. Before rebuilding stale sketches, the reachability set of latent seed set is marked as visited, and considered blocked in their respective simulations while rebuilding the sketches. Two threshold values allow the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. If a rebuild is not required, only the last added vertex's sketch is also merged with $mask$ to update $R_G(S)$.
 
 This approach allows us to keep sketches high quality even after many vertices are added to the seed set, but on the other hand, forces us to perform Monte-Carlo simulations which can be very costly. Other methods mentioned in this paper, doesn't report time spend on calculating the influence scores, whereas our method includes the time since it is crucial for keeping sketches in high quality.
 
