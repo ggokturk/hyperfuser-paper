@@ -87,9 +87,9 @@ pdfkeywords={Influence Maximization, Graph Processing, Graph Sampling, Fused Sam
 
 \IEEEtitleabstractindextext{%
 \begin{abstract}
-Influence maximization~(IM) is the problem of finding a seed vertex set that maximizes the expected number of vertices influenced under a given diffusion model. Due to the NP-Hardness of finding an optimal seed set, approximation methods are frequently used for IM. In addition to high-quality yet expensive approximation algorithms, to meet with the scale of today's networks, lightweight, sketch-based approaches, which do not simulate the process exactly, have been proposed in the literature. As expected, the quality of the seed sets for the latter is inferior to those of the former. In this work, we describe a fast, error-adaptive approach that leverages Count-Distinct sketches and the recently proposed hash-based, fused sampling. To estimate the vertex set sizes influenced throughout the simulations, we use per-vertex Flajolet-Martin sketches where each sketch register corresponds to a sample sub-graph. During the diffusion simulations, the reach set cardinalities of a single vertex are stored in adjacent registers in memory. This allows the proposed algorithm to find the number of influenced vertices in a single simulation step in different simulations at once. In addition, thanks to its efficiency and scalability of the our the parallel implementation can rebuild the sketches after observing large estimation errors. Our experimental results show that the proposed method finds high-quality seed sets  while being up-to $1.7\times$--$27.9\times$ faster on average than a state-of-the-art approximation algorithm. In addition, it is shown to be $3.5\times$--$11.1\times$ faster than a sketch-based approach while producing seed sets with $3\%$--$12\%$ better influence scores.
+Influence maximization~(IM) is the problem of finding a seed vertex set that maximizes the expected number of vertices influenced under a given diffusion model. Due to the NP-Hardness of finding an optimal seed set, approximation methods are frequently used for IM. In addition to high-quality yet expensive approximation algorithms, to meet with the scale of today's networks, lightweight, sketch-based approaches, which do not simulate the process exactly, have been proposed in the literature. As expected, the quality of the seed sets for the latter is inferior to those of the former. In this work, we describe a fast, error-adaptive approach that leverages Count-Distinct sketches and the recently proposed hash-based, fused sampling. To estimate the vertex set sizes influenced throughout the simulations, we use per-vertex Flajolet-Martin sketches where each sketch register corresponds to a sample sub-graph. During the diffusion simulations, the reach set cardinalities of a single vertex are stored in adjacent registers in memory. This allows the proposed algorithm to find the number of influenced vertices in a single simulation step in different simulations at once. In addition, thanks to its efficiency and scalability of our parallel implementation can rebuild the sketches after observing large estimation errors. Our experimental results show that the proposed method finds high-quality seed sets  while being up-to $1.7\times$--$27.9\times$ faster on average than a state-of-the-art approximation algorithm. In addition, it is shown to be $3.5\times$--$11.1\times$ faster than a sketch-based approach while producing seed sets with $3\%$--$12\%$ better influence scores.
 \end{abstract}
-% Note that keywords are not normally used for peerreview papers.
+% Note that keywords are not normally used for peer review papers.
 }
 
 
@@ -256,7 +256,7 @@ The complexity analysis stays consistent for many diffusion models including {\e
 We concentrate on the independent cascade model in this paper, but the proposed methods are also relevant to the other models in the literature.
 %  \[ \sigma(S^*)=\argmax_{S\subseteq V \land |S| \leq k } \sigma_{G}(S) \]
 
-%is a simple diffusion model that Vertex v can be activated by any of incoming edges from activated vertices w with probability $p$. Given a seed set $S$ and influence probability $p$, cascade model starts from activated seed set and tries to diffuse until each of the out-going edges of active vertices are considered. The diffusion process considers all edges only once.
+%is a simple diffusion model that Vertex v can be activated by any of incoming edges from activated vertices w with probability $p$. Given a seed set $S$ and influence probability $p$, the cascade model starts from the activated seed set and tries to diffuse until each of the out-going edges of active vertices are considered. The diffusion process considers all edges only once.
 
 \subsection{Count-Distinct Sketch}\label{sec:sketch}
 The count-distinct problem is the problem of finding the number of distinct elements in a stream with non-distinct elements. Computing reachability sets of a vertex is a similar problem; the cardinality of all vertices visited is calculated while traversing sample sub-graphs from the given vertex. Exact cardinality calculations require memory proportional to the cardinality. 
@@ -273,7 +273,7 @@ if Disjoints sets are used for storing reachability sets; $(n\bar{\sigma}\mathca
 Count-distinct sketches have nice properties for such problems; Flajolet–Martin algorithm\cite{flajolet1985probabilistic} can estimate the cardinality of distinct elements in reachability sets with a constant number of registers($J$), and most importantly union of these sets can be done in a constant number of operations.
 
 
-Flajolet–Martin sketch only stores how rare elements are in a multi-set.The rarity of the elements is often computed by counting leading zeros in the item's hash values.  The registers are initialized with zero values in beginning. Items are added by storing the longest leading zero count. Cardinality estimation can be done by taking 2 to the power of the stored value. Multiple registers and hash functions, $M[j]$ and $h_j$, are commonly used to reduce variance.
+Flajolet–Martin algorithm only stores how rare elements are in a multi-set.The rarity of the elements is often computed by counting leading zeros in the item's hash values.  The registers are initialized with zero values in beginning. Items are added by storing the longest leading zero count. Cardinality estimation can be done by taking 2 to the power of the stored value. Multiple registers and hash functions, $M[j]$ and $h_j$, are commonly used to reduce variance.
 Adding item $x$ to sketch $M$, and its result $M'$ is shown in equation~\ref{eq:sketch-add}.
 
 \begin{equation}
@@ -295,43 +295,7 @@ Average of longest running zeros can be used compute the cardinality and the res
 \end{equation} 
 where $e$ distinct cardinality and $\bar{M}$ is the mean of the registers.
 
-In this work, we utilize a variant of Flajolet–Martin sketch; since multiple Monte-Carlo simulations are performed to calculate estimated influence, we use one register per simulation, and take average of longest leading zero counts to calculate average cardinality of reachability sets. Also, in an another perspective, it is same as using register as much as MC simulation, where updates are done with same probability as influence propagation. 
-
-
-% \subsection{SIMD}
-% {\em Single Instruction-Multiple Data} machines exploits data level parallelism to perform the same operation on multiple data points simultaneously. In this work, we utilized Advanced Vector Extensions (AVX2) instruction set. AVX2 works on 256-bit registers in multiple packed forms; 8x32 bit operations are used in fused sampling, where as sketch merge  performed with 32x8bit operations. This dichotomy between operations solved by processing in 32 simulations batches at a time.
-% Even-though, auto-vectorization is enabled, most of the operation mention are cannot be vectorized by the compiler. As far as we know, no compiler vectorizes chain conditional move or move-mask operations. Vectorization in the implementation is done using explicit intrinsics.
-
-% First, active edges are checked by generating random values, $P(u,v)_r$. After comparing random values with edge threshold, active edges are store in an 32bit integer as one-hot vector. Then,  
-
-
-% For completeness, the intrinsics explicitly used in this paper are described in Table~\ref{tab:avx2-instructions}.
-
-% \begin{table}[!ht]
-%     \caption{AVX2 intrinsics used in the implementation.}
-%     \label{tab:avx2-instructions}
-%     \centering
-
-%     \begin{tabular}{|p{0.33\linewidth}|p{0.58\linewidth}|}
-%     \hline
-%     Intrinsic & Definition\\
-%     \hline
-%     {\tt \_mm256\_set1\_epi32} & Initializes 256-bit vector with scalar integer values. Doesn't map to any AVX instructions. \\
-%         % \hline
-%     {\tt \_mm256\_and\_si256} & Performs bitwise logical AND operation on 256-bit integer vectors. \\
-%             % \hline
-%     {\tt \_mm256\_xor\_si256} &  Performs bitwise logical XOR operation on 256-bit integer vectors.\\
-%             % \hline
-%     {\tt \_mm256\_cmpgt\_epi32} & Compares packed 8x32-bit integers of two input vectors.\\
-%     {\tt \_mm256\_max\_epi8} & Compares packed 32x8-bit integers of two input vectors and returns element-wise maximums. \\
-%             % \hline
-%         % \hline
-%     {\tt \_mm256\_movemask\_ps} & Extracts the first bits of 8x 32-bit elements in a compact 8-bit format \\
-%             % \hline
-%     {\tt \_mm256\_blendv\_epi8} & Blends/selects byte elements of input vectors depending on the bits in a given mask vector.\\ 
-%              \hline         
-%     \end{tabular}
-% \end{table}{}
+In this work, we utilize a variant of Flajolet–Martin sketch; since multiple Monte-Carlo simulations are performed to calculate estimated influence, we use one register per simulation, and take the average of longest leading zero counts to calculate the average cardinality of reachability sets. Merge operations are performed if and only if there is an edge between the respective simulation. 
 
 \section{Method}\label{sec:method}
 
@@ -346,7 +310,7 @@ It is sampled or skipped depending on the outcome of the hash-based random value
 \end{equation}
 where $||$ is the concatenation operator. 
 
-We have tried a few other hash algorithms as well; Ideally, we chose {{\sc Murmur3}} due to its simplicity and good avalanche behavior with maximum bias $0.5\%$\rev{\cite{MurmurHash3Performance}}.
+We have tried a few other hash algorithms as well; Ideally, we chose {{\sc Murmur3}} due to its simplicity and good avalanche behavior with maximum bias $0.5 \% $\cite{MurmurHash3Performance}.
 
 For performance considerations, edge hash values were pre-computed in our work and only existing pairs were considered. The trade-off between extra memory and computation here maybe not be applicable for different computation architectures and faster/simpler hash functions.
 
@@ -389,7 +353,7 @@ An efficient implementation of this approach will be discussed later in this sec
 Using a strong hash function such as {{\sc Murmur3}} ensures all bits independently change if the input is changed. This property allows us to generate good enough pseudo-random values for fair sampling. To prove the fairness of random values generated with the hash-based approach, we generated a large number of samples for various real-life networks and graphed the bias of random values $P(u,v)_r$ used while sampling.
 
 % For a given graph $G = (V,E)$, the bias of a sampling probability $x$ is computed as $|(31/2) − E(|H(m)|) / E(|H(m)|))|$ for all $(u,v) \in E$ and $0 \leq r < R$. 
-Figure~\ref{fig:prob-bias} shows the bias for 12 real-life networks. The sampling probability distribution with hash-based computation is almost identical to the uniform distribution with very small bias.
+Figure~\ref{fig:prob-bias} shows the bias for 12 real-life networks. The sampling probability distribution with hash-based computation is almost identical to the uniform distribution with small bias.
 
 
 \begin{figure}[!ht] 
@@ -420,9 +384,18 @@ After diffusion, the following process is repeated until $K$ vertices are added 
 
 Since building sketches with \acro is very fast, we exploit this by rebuilding sketches after observing large cardinality estimation errors.
 After adding vertices to the seed set, \acro performs Monte-Carlo simulations to estimate the reachability of the latent seed set.
-The sketches are assumed as stale if the absolute error in estimated total influence score is more than the global threshold, $\epsilon_{g}$, and the marginal gain estimation error after the last sketch is larger than local threshold $\epsilon_{l}$. Before rebuilding stale sketches, the reachability set of latent seed set is marked as visited, and considered blocked in their respective simulations while rebuilding the sketches. Two threshold values allow the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. If a rebuild is not required, only the last added vertex's sketch is also merged with $mask$ to update $R_G(S)$.
+The sketches are assumed as stale if the absolute error in estimated total influence score is more than the global threshold, $\epsilon_{g}$, 
+and the marginal gain estimation error after the last sketch is larger than a local threshold $\epsilon_{l}$. 
+Before rebuilding stale sketches, the reachability set of latent seed set is marked as visited, 
+and considered blocked in their respective simulations while rebuilding the sketches. 
+Two threshold values allow the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. 
+If a rebuild is not required, only the last added vertex's sketch is also merged with $mask$ to update $R_G(S)$.
 
-This approach allows us to keep sketches high quality even after many vertices are added to the seed set, but on the other hand, forces us to perform Monte-Carlo simulations which can be very costly. Other methods mentioned in this paper, doesn't report time spend on calculating the influence scores, whereas our method includes the time since it is crucial for keeping sketches in high quality.
+This approach allows us to keep sketches high quality even after many vertices are added to the seed set, 
+but on the other hand, forces us to perform Monte-Carlo simulations which can be very costly. 
+
+Other methods mentioned in this paper, doesn't report time spend on calculating the influence scores, 
+whereas our method includes the time since it is crucial for keeping sketches in high quality.
 
 
 \begin{figure*}[!ht]
@@ -519,72 +492,7 @@ One of the main advantages of fused sampling is allowing similar simulation data
 
  All memory registers from different simulations are stored together for each vertex, this allows the use of vectorized computation hardware. Random number generation, sampling, and merging sketches are all vectorizable operations when coupled together. Vectorization also reduces branching on overall computation; When vectorized, many comparison operations are done without branching. 
 
-We allow a single easy to predict branch after sample edges are generated to exit early without merging the registers. In our experiments, sorting random values $X_r$ significantly increases performance by clustering similar simulations together. Since sorted random values are XOR'ed with the same edge hash values, it is more likely to non-taken edges are sampled together. Up to 20\% performance can be gained by early exit at line \ref{ln:early_exit} using sorted random values.
-
-% Our implementation generates $B/4$ sample edges and runs $B$ simulations at a time. The dichotomy of two batch sizes comes from SIMD width; 
-% sampling probabilities are computed in 31-bit fixed-point precision, 
-% whereas since we are using 64-bit hash values, sketch registers only require $\left\lceil log2(64+1) \right\rceil = 6$ bits. Aligned to the nearest data type they can fit, sampling probabilities utilizes 8x32-bit operators, whereas sketch operations employ 32x8bit SIMD vectors. 
-
-
-% ~works in batches. Each batch sized $B=8$ processed by follows; first, edge hash and threshold are loaded to vector units. The live sample vector, which is stored as 32-bit unsigned integer is initialized with zero.  Then, liveness information is inferred by generating random numbers and comparing them to the edge activation threshold. Random number generation is done by XOR'ing simulation randoms between $X_{r}$ to $X_{r+b}$ and edge hash. Resulting random numbers are considered as fixed-point numbers and compared with the edge threshold $W_{u,v}$ which is also stored as a fixed-point number. After, 8x 32-bit aligned results are converted to compact 8-bit representation by extracting the first bits using the move mask operator. Finally, the result is appended to the live sample vector. Since the live sample vector is a one-hot 32-bit integer, if it is zero, the edge is blocked in all samples and we can skip merging sketch registers.  
-
-% {\bf Regularization.} %FIXme
-
-% {\bf Vectorized Sketch Merge} can work with larger batch size, due to smaller item size. Before the merge, bitwise-AND is performed on live sample vector bits and the inverse of the visited set of source vertex $u$ to find samples where $u$ is not visited. Live sample vector expanded to 32x8bit vector, all 1 bits converted to 255, and 0 bits are converted to 0 bytes in AVX2 vector.
-
-% After expansion, Registers of source and target vertex, $M_u$ and $M_v$, are compared to get element-wise maximums. Then, only live samples were selected from the maximum vector by blending live sample byte vector. Finally, $M_u$ is compared against its previous value to check whether source vertex $u$ will be added to the next iteration's live vertices set.
-
-
-% \begin{algorithm}
-%     \caption{\sc{Vectorized-Merge} ({$u,v,X_r,M_u,M_v,$})}\label{algo:vector-merge}
-%     \algorithmicrequire{
-%     $u:$ source vertex\\
-%     \hspace*{7ex}$v:$ target vertex\\
-%     \hspace*{7ex}$X$: random number for simulations\\
-%     \hspace*{7ex}$M_u$: sketch registers of $u$\\
-%     \hspace*{7ex}$M_v$: sketch registers of $v$\\
-%     \hspace*{7ex}$visited$: one-hot visited vector grouped by samples}\\
-%     \algorithmicensure{$islive$: a boolean which state if $u$ is live}
-%     % \hspace*{8ex}$live_v$: a boolean which state if $v$ is live
-%     \begin{algorithmic}[1]
-%         \State $islive \leftarrow False$
-%         \For{$r \in [0,32,64,\dots,J)$}
-%             \State $hashvec \leftarrow \_mm256\_set1\_epi32(hash(u,v)$
-%             \State $threshold \leftarrow \_mm256\_set1\_epi32(w_{u,v})$
-%             \State $live \leftarrow 0$
-%             \For{$b\in [0,8,16,24]$}
-%                 \State $prob \leftarrow \_mm256\_xor\_si256(X_{r+b\dots8},hashvec)$
-%                 \State $cmp \leftarrow \_mm256\_cmpgt\_epi32(threshold, prob)$
-%                 \State $cmpmask \leftarrow \_mm256\_movemask\_ps(cmp))$
-%                 \State $live\leftarrow (cmpmask<<b)~|~live $
-%                 \EndFor
-%                 \If{$live = 0$}
-%                     \State continue
-%                 \EndIf
-%                 \State $live \leftarrow live~\&~\sim visited_{u}[r..32]$
-%                 \State $livebytes \leftarrow expand\_bits\_to\_bytes(live)$
-%                 % \State $M' \leftarrow 
-%                 %     \_mm256\_cmpgt\_epi8(M_u[r..32],M_v[r..32])$
-%                 % \State $select \leftarrow \_mm256\_and\_si256(livebytes,M')$
-%                 % \State $M_u \leftarrow \_mm256\_blendv\_epi8(M_u[r..32],M_v[r..32])$
-%                 % % \State $$
-%                 % \State $islive \leftarrow islive~|~  \_mm256\_cmp\_ps(\newline
-%                 %     \hspace*{4em}\_mm256\_setzero\_ps(), \newline
-%                 %     \hspace*{4em}\_mm256\_castsi256\_ps(sel))$
-
-%                 \State $max \leftarrow 
-%                     \_mm256\_max\_epi8(M_u[r..32],~M_v[r..32])$
-%                 \State $temp \leftarrow M_u[r..32] $
-%                 \State $M_u[r..32] \leftarrow \_mm256\_blendv\_epi8(\newline  
-%                 \hspace*{4em}M_u[r..32],~max,~livebytes)$
-%                 % \State $$
-%                 \State $islive \leftarrow islive~|~\_mm256\_cmp\_ps(M_u[r..32],~temp)$
-
-%                 % \State $live \leftarrow live \setminus \bigcup_{} j|u\notin R_{\hat{G}_j} $ 
-%             % \EndIf
-%         \EndFor
-%     \end{algorithmic}
-%     \end{algorithm}
+We allow a single easy to predict branch after sample edges are generated to exit early without merging the registers. In our experiments, sorting random values $X_r$ significantly increases performance by clustering similar simulations together. Since sorted random values are XOR'ed with the same edge hash values, it is more likely to non-taken edges are sampled together. Up to 20\% performance can be gained by an early exit at line \ref{ln:early_exit} using sorted random values.
 
 \subsection{Implementation Details}
 The Compressed Sparse Row~(CSR) graph data the structure used by all the algorithms. 
@@ -636,7 +544,7 @@ Three diffusion settings are simulated for a comprehensive experimental evaluati
     % \item weighted cascade edge weights $w_{u,v} = 1/|\Gamma(v)|$.
 \end{enumerate}
 
-We selected $w=0.005$ as one of our benchmark settings to challenge ourselves; Due to nature of diffusion algorithm, \acro traverses vertices even if they are blocked. Also, for each live vertex \acro generates sample edges for all simulations regardless. Small $w$ values increases overhead operations we mentioned. Other two experiment settings are used to emulate experiments of Kempe et al.~\cite{kempe2003maximizing}
+We selected $w=0.005$ as one of our benchmark settings to challenge ourselves; Due to the nature of the diffusion algorithm, \acro traverses vertices even if they are blocked. Also, for each live vertex \acro generates sample edges for all simulations regardless. Small $w$ values increases overhead operations we mentioned. The other two experiment settings are used to emulate experiments of Kempe et al.~\cite{kempe2003maximizing}
 
 
 \subsection{Performance Metrics}
@@ -822,7 +730,8 @@ All algorithms mentioned in this paper, estimates influence maximizing seed sets
 We performed experiments using following parameters; {\sc Tim+} ($\epsilon=0.3$), {\sc Imm} ($\epsilon=0.5$), {\sc Skim} ($l=64,k=64$). 
 
 One of the drawbacks of \acro is that we do not have direct control over the approximation factor whereas other methods we compare against some form of an approximation control parameter. \acro can only control approximation quality indirectly by tuning the number of Monte-Carlo simulations $J$, and to some degree with estimation/convergence thresholds. 
-For \acro, we used $J=256$ registers which is comparable in terms of quality of other methods. And, for performance we used global estimation error threshold $\epsilon_{global}=0.01$, local estimation error threshold $\epsilon=0.3$, and set non-converged vertices ratio as $\epsilon_{conv}=0.02$. The threshold values are chosen by observations and intuition, simple grid search over threshold most likely would give superior performance but we opt-to leave parameter selection to future work.
+For \acro, we used $J=256$ registers which is comparable in terms of quality of other methods. And, for performance we used global estimation error threshold $\epsilon_{global}=0.01$, local estimation error threshold $\epsilon=0.3$, and set non-converged vertices ratio as $\epsilon_{conv}=0.02$. 
+
 
 For small $w=0.005$ and small graphs such as NetHep, NetPhy, or Amazon; we can see {\sc Tim+}  has ($4\sim 6\%$) better results, whereas {\sc Skim}  has much ($- 13\sim 44\%$) worse results than \acro in terms of quality. While \acro having a hard time to catch edges in samples; \acro has a chance of capturing an edge is $1-(1-0.005)^{256}=0.72$, {\sc Tim+} won't suffer from the situation but {\sc Skim}  suffer much worse capturing vertices in sketches. On the performance side, \acro is superior to other methods, Amazon dataset only takes 1.3 seconds including Monte-Carlo influence oracle computations. {\sc Skim} and {\sc Imm} take 63.73 and 124.38 seconds. For 4\% quality improvement, {\sc Imm} is $\sim$100 slower than \acro. For small improvements in quality, we can always double the number of registers/simulations $J=256$ to $512$, which would approximately double the wall time. For the same $w=0.005$ and larger graphs such as {\tt LiveJournal} and {\tt Orkut}, the quality gap narrows {\sc Skim}  only $5\%$ behind, and {\sc Tim+} is marginally better. 
 The performance gap also narrows between \acro and {\sc Skim}, \acro only $30\%$ faster in small $w$. In the same setting, {\sc Tim+}  takes 1.5 hours for {\tt LiveJournal}, \ggx{could not finish {\tt Orkut}; crashing after consuming all memory available}. 
@@ -848,11 +757,11 @@ Two-phased Influence Maximization({\sc Tim+} )\cite{tim} borrows ideas from RIS 
 Cohen\cite{cohen2015all} presented the Historic Inverse Probability (HIP) estimators. When applied to the All Distance Sketches, HIP outperforms in estimation quality of the HyperLogLog sketches\cite{flajolet2007hyperloglog} for approximate distinct counting on data streams. In this work, we preferred Flajolet-Martin\cite{flajolet1985probabilistic} sketches for simplicity and performance. In future work, other estimators such as HIP can improve to improve \acro.
 
 Kumar and Calders\cite{kumar2017information} proposed Time Constrained Information
-Cascade Model and an influence maximization algorithm that works on the model using versioned HyperLogLog sketches. The algorithm performs the influence reachability sets for all vertices in an interaction graph performing a single pass over the data. Sketches build for each time window to estimate active edges where as \acro builds sketches for each vertex to estimate cumulative influence of the latent seed set. \acro also utilizes fused sampling and error adaptive rebuilding of sketches.
+Cascade Model and an influence maximization algorithm that works on the model using versioned HyperLogLog sketches. The algorithm performs the influence reachability sets for all vertices in an interaction graph performing a single pass over the data. Sketches build for each time window to estimate active edges where as \acro builds sketches for each vertex to estimate the cumulative influence of the latent seed set. \acro also utilizes fused sampling and error adaptive rebuilding of sketches.
 
 \section{Conclusion \ggx{and Future Work}}\label{sec:conclusion}
 
-In conclusion, we propose a sketch-based Influence Maximization algorithm that employs fused sampling and error-adaptive rebuilding. We provide a fast implementation of the algorithm that utilizes multi-threading to exploit multiple CPU cores. In addition, we present performance comparison with state-of-the-art IM algorithms on real-world datasets. 
+In conclusion, we propose a sketch-based Influence Maximization algorithm that employs fused sampling and error-adaptive rebuilding. We provide a fast implementation of the algorithm that utilizes multi-threading to exploit multiple CPU cores. In addition, we present a performance comparison with state-of-the-art IM algorithms on real-world datasets. 
 With the proposed method, \acro{} can achieve $\maxspeedupSKIM\times$ speed-up against {\sc Skim} and $\maxspeedupIMM\times$ speed-up against {\sc Imm} while producing high quality results. 
 
 In the future, we would like to extend our work to a distributed GPGPU setting to process graphs with billions of vertices and edges. The main issue with \acro on such computation scheme is the broadcast of sketch registers; when vertices are partitioned to different computation units, resulting sketch updates should be communicated to all partitions. To overcome the issue, graph pre-processing and speculative diffusion strategies can reduce communication bottlenecks. 
@@ -870,7 +779,7 @@ In the future, we would like to extend our work to a distributed GPGPU setting t
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{./images/gokhan.png}}]{G\"{o}khan~G\"{o}kt\"{u}rk} is a PhD candidate at the Faculty of Engineering and Natural Sciences in Sabancı University. He has received his BS and MS degrees from Sabancı University as well. He is interested in High Performance Computing, Parallel Programming, and Graph Processing.
 \end{IEEEbiography}
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{./images/kamer.jpg}}]{Kamer Kaya} is an Assistant Professor at the Faculty of Engineering and Natural Sciences at Sabancı University. He got his PhD from Dept. Computer Science and Engineering from Bilkent University. He worked at CERFACS, France, as a post-graduate researcher in the Parallel Algorithms Project. He then joined the Ohio State University in September 2011 as a postdoctoral researcher, and in December 2013, he became a Research Assistant Professor in the Dept. of Biomedical Informatics.
-His current research interests include Parallel Programming, High Performance Computing, and Cryptography. 
+His current research interests include Parallel Programming, High-Performance Computing, and Cryptography. 
     \end{IEEEbiography}
 
 \end{document}
