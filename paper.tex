@@ -129,7 +129,7 @@ In this work;
 That is when the simulations traverse the same edge within close time intervals, the edge is accessed only once as long as the simulation timelines allow \acro to do so. The suggested approach, therefore, decreases the pressure on the memory management unit. In relation, for the cascade model, we employ a vector compute unit, near maximum efficiency to regularize memory accesses. 
 %\item In addition to instruction-level parallelism, we parallelize \acro on multi-core architectures.
 
-\item \acro{} can process very large graphs with millions of vertices and hundreds of millions of edges under a minute, without compromising the quality of results. For large graphs, due to its \ggx{race condition indifferent} nature, performance scales near linearly with the number of threads available. While processing the graph, only we few GBs of memory is used, mostly for storing the graph itself. 
+\item \acro{} can process very large graphs with millions of vertices and hundreds of millions of edges under a minute, without compromising the quality of results. For large graphs, due to its race condition indifferent nature, performance scales near linearly with the number of threads available. While processing the graph, only we few GBs of memory is used, mostly for storing the graph itself. 
 
 % \item \acro can be around $200000\times$ faster compared to the traditional greedy approaches. It is usable on large graphs that have been considered as {\em too large} in the literature. For instance, the new algorithm runs in $2.09$, $0.08$, $0.36$ seconds on networks {\tt Amazon}, {\tt NetHEP}, {\tt NetPhy} with 16 threads where the sequential baseline takes $141.3$, $259.1$ and $1725.2$ seconds, respectively. In fact, with a 302,400 seconds~(3.5 days) timeout, the sequential baseline can process only the above-mentioned 3 (out of 12) real-life graphs, having 1.2M, 58.9K and 231.5K edges. On the other graphs, the original algorithm cannot complete the simulations within the time limit. However, \acro{} completes all of 12 graphs around 1200 seconds in total, where the maximum is 654 seconds for the {\tt Orkut} network having 3.1M vertices and 117.2M edges. 
 
@@ -346,7 +346,7 @@ The edge $\{u,v\}$ is exists in the sample $r$ if and only if  ${P}(u,v)_r$ is s
 An efficient implementation of this approach will be discussed later in this section.
 \begin{figure}[!ht] 
     \centering
-    \includegraphics[width=1\linewidth]{./images/cdf.pdf}
+    \includegraphics[width=1\linewidth]{./images/CDF.pdf}
     \caption{Cumulative probability function of hash-based sampling probabilities on various real-life networks.}
     \label{fig:prob-cdf} 
 \end{figure}
@@ -382,6 +382,20 @@ After diffusion, the following process is repeated until $K$ vertices are added 
 
 \subsection{Error-Adaptive Sketch Rebuilding}
 
+Sketches are very fast approximation methods that often provide less than gold standard results. In our case, sketches are very competent at finding the first few vertices, but after sketch registers saturate with high values. Register saturation causes the naive count-distinct sketch method to not distinguish between vertices. 
+
+\begin{figure}[!ht]
+    \begin{center}
+    \includegraphics[width=\linewidth]{images/sketch-saturation.pdf}
+    \caption{ Effect of register saturation on Amazon dataset using \acro($J=256$) without rebuilding.
+     }\label{fig:sketch-saturation} 
+    \end{center}
+\end{figure}
+
+In figure \ref{fig:sketch-saturation}, we show the effect of register saturation by comparing two methods; one that uses a new sketch, that build on the residual graph after seed sets' reachability is removed,for all iterations. Other, builds the sketch once at the beginning, then only utilizes sketch merge operations to find the seed set. 
+Even though at first few vertices influence is comparable, we see observe near-linear drop-off in estimated influence.
+    
+
 Since building sketches with \acro is very fast, we exploit this by rebuilding sketches after observing large cardinality estimation errors.
 After adding vertices to the seed set, \acro performs Monte-Carlo simulations to estimate the reachability of the latent seed set.
 The sketches are assumed as stale if the absolute error in estimated total influence score is more than the global threshold, $\epsilon_{g}$, 
@@ -392,7 +406,7 @@ Two threshold values allow the algorithm to rebuild after large local errors but
 If a rebuild is not required, only the last added vertex's sketch is also merged with $mask$ to update $R_G(S)$.
 
 This approach allows us to keep sketches high quality even after many vertices are added to the seed set, 
-but on the other hand, forces us to perform Monte-Carlo simulations which can be very costly. 
+but on the other hand, forces us to perform Monte-Carlo simulations which can be very costly. We reuse the reachability sets of latent seed set, $R_G(S')$, computed by Monte-Carlo simulations. While rebuilding sketches, $R_G(S')$ is used to check whether if a vertex is blocked in a sample.
 
 Other methods mentioned in this paper, doesn't report time spend on calculating the influence scores, 
 whereas our method includes the time since it is crucial for keeping sketches in high quality.
@@ -431,8 +445,8 @@ For the live edge between Vertex 1 and 4, the register is set to the maximum of 
         \State $S \leftarrow S \cup \{s\}$
         \State $e \leftarrow estimate(merge(mask,M_s))$
         % \State $R_S \leftarrow run\_cascade(G,S,J)$
-        \State {Compute seed set $S$'s Reachability set $R_S(S)$ }
-        \State $\sigma_G(S) \leftarrow |R_S|/J$
+        \State {Compute seed set $S$'s Reachability set $R_{G}(S)$ }
+        \State $\sigma_G(S) \leftarrow |R_{G}|/J$
         \State $\delta = \sigma - \varsigma$
         \If{$ (e - \delta) / \delta < \epsilon_l \lor |e-\delta| / \sigma < \epsilon_g$}
             \State $mask \leftarrow merge(mask,M_s)$
