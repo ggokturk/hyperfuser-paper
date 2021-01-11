@@ -382,7 +382,7 @@ After diffusion, the following process is repeated until $K$ vertices are added 
 
 \subsection{Error-Adaptive Sketch Rebuilding}
 
-Sketches are very fast approximation methods that often provide less than gold standard results. In our case, sketches are very competent at finding the first few vertices, but after sketch registers saturate with high values. Register saturation causes the naive count-distinct sketch method to not distinguish between vertices. 
+Sketches are very fast approximation methods that often provide less than gold standard results. In our case, sketches are very competent at finding the first few vertices. But, after sketch registers saturate with high values, we observe a significant drop in the quality of results. Register saturation causes the naive count-distinct sketch method to not distinguish between vertices. 
 
 \begin{figure}[!ht]
     \begin{center}
@@ -393,20 +393,20 @@ Sketches are very fast approximation methods that often provide less than gold s
 \end{figure}
 
 In figure \ref{fig:sketch-saturation}, we show the effect of register saturation by comparing two methods; one that uses a new sketch, that build on the residual graph after seed sets' reachability is removed,for all iterations. Other, builds the sketch once at the beginning, then only utilizes sketch merge operations to find the seed set. 
-Even though at first few vertices influence is comparable, we see observe near-linear drop-off in estimated influence.
+Even though at first few vertices expected influence is comparable, we see observe near-linear drop-off in estimated influence.
     
 
 Since building sketches with \acro is very fast, we exploit this by rebuilding sketches after observing large cardinality estimation errors.
 After adding vertices to the seed set, \acro performs Monte-Carlo simulations to estimate the reachability of the latent seed set.
 The sketches are assumed as stale if the absolute error in estimated total influence score is more than the global threshold, $\epsilon_{g}$, 
 and the marginal gain estimation error after the last sketch is larger than a local threshold $\epsilon_{l}$. 
-Before rebuilding stale sketches, the reachability set of latent seed set is marked as visited, 
-and considered blocked in their respective simulations while rebuilding the sketches. 
-Two threshold values allow the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. 
-If a rebuild is not required, only the last added vertex's sketch is also merged with $mask$ to update $R_G(S)$.
 
-This approach allows us to keep sketches high quality even after many vertices are added to the seed set, 
-but on the other hand, forces us to perform Monte-Carlo simulations which can be very costly. We reuse the reachability sets of latent seed set, $R_G(S')$, computed by Monte-Carlo simulations. While rebuilding sketches, $R_G(S')$ is used to check whether if a vertex is blocked in a sample.
+Before rebuilding stale sketches, the reachability set of latent seed set,$R_G(S')$, is marked as visited, 
+and considered blocked in their respective simulations while rebuilding the sketches. Then, sketches are rebuild using Monte-Carlo simulations. After rebuilding, $mask$, which holds the cardinality estimate of the seed vertices added after the last rebuild, is cleared with all zeros.
+
+Two threshold values allow the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. 
+If a rebuild is not required, we only update the $mask$ by merging it with the candidate vertex's sketch. 
+This approach allows us to keep sketches high quality even after many vertices are added to the seed set, but on the other hand, forces us to perform Monte-Carlo simulations which can be expensive. We reuse the reachability sets of latent seed set, $R_G(S')$, computed by Monte-Carlo simulations. While rebuilding sketches, $R_G(S')$ is used to check whether if a vertex is blocked in a sample.
 
 Other methods mentioned in this paper, doesn't report time spend on calculating the influence scores, 
 whereas our method includes the time since it is crucial for keeping sketches in high quality.
@@ -714,16 +714,6 @@ Geo. Mean wrt.&1.00x&1449.41x&27.87x&11.06x&1.00x&1.00x&1.00x&0.97x&1.00x&163.77
  \end{figure}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \begin{figure*}[htbp] 
-%     \centering
-%     \includegraphics[width=1\linewidth]{images/threads}
-%     \centering\caption{Speed-up obtained by \acro{} over {\sc Imm}($\epsilon\myeq 0.13$).
-%   \label{fig:scaling} }  
-% \end{figure*}
-
-
 \subsection{Scalability with multi-threaded parallelism}
 
 \begin{figure*}[!ht] 
@@ -734,7 +724,7 @@ Geo. Mean wrt.&1.00x&1449.41x&27.87x&11.06x&1.00x&1.00x&1.00x&0.97x&1.00x&163.77
 \end{figure*}
 
 
-In our implementation, the parallel processing of live vertices  (as source) is necessary to reduce the number of visited edges. However, since a (target) vertex can be being processed at the same time, the update operation at line~\ref {ln:update} of this {\em pull-based} approach can be seen as a potential source of race conditions. But, since iterations are performed until convergence, \ggx{the results are sound within our assumptions}. On the other hand, the performance may suffer due to false sharing.
+In our implementation, the parallel processing of live vertices  (as source) is necessary to reduce the number of visited edges. However, since a (target) vertex can be being processed at the same time, the update operation at line~\ref {ln:update} of this {\em pull-based} approach can be seen as a potential source of race conditions. But, since iterations are performed until convergence, the results are sound within our assumptions. On the other hand, the performance may suffer due to false sharing.
 Figure~\ref{fig:scaling} shows the speedup values obtained via {\tt OpenMP} parallelization.
 
 Even though {\em pull-based} diffusion approach we employed in this work gives us superior performance in most of the benchmarks, it is possible to implement \acro using other approaches; E.g. {\em queue-based} approach is similarly feasible and may improve performance by only processing live vertices. The pull-based diffusion method is chosen due to its simplicity and scalability to a large number of threads/compute units. 
@@ -748,8 +738,8 @@ For \acro, we used $J=256$ registers which is comparable in terms of quality of 
 
 
 For small $w=0.005$ and small graphs such as NetHep, NetPhy, or Amazon; we can see {\sc Tim+}  has ($4\sim 6\%$) better results, whereas {\sc Skim}  has much ($- 13\sim 44\%$) worse results than \acro in terms of quality. While \acro having a hard time to catch edges in samples; \acro has a chance of capturing an edge is $1-(1-0.005)^{256}=0.72$, {\sc Tim+} won't suffer from the situation but {\sc Skim}  suffer much worse capturing vertices in sketches. On the performance side, \acro is superior to other methods, Amazon dataset only takes 1.3 seconds including Monte-Carlo influence oracle computations. {\sc Skim} and {\sc Imm} take 63.73 and 124.38 seconds. For 4\% quality improvement, {\sc Imm} is $\sim$100 slower than \acro. For small improvements in quality, we can always double the number of registers/simulations $J=256$ to $512$, which would approximately double the wall time. For the same $w=0.005$ and larger graphs such as {\tt LiveJournal} and {\tt Orkut}, the quality gap narrows {\sc Skim}  only $5\%$ behind, and {\sc Tim+} is marginally better. 
-The performance gap also narrows between \acro and {\sc Skim}, \acro only $30\%$ faster in small $w$. In the same setting, {\sc Tim+}  takes 1.5 hours for {\tt LiveJournal}, \ggx{could not finish {\tt Orkut}; crashing after consuming all memory available}. 
-\ggx{On larger} $w=0.1$, \acro is much faster than all other methods and still providing high-quality results. While all methods are struggling with problem size, \acro is converging results much faster, even faster than previous experiment settings. Also, memory consumption stays the same for all experimental settings, much smaller than other methods.
+The performance gap also narrows between \acro and {\sc Skim}, \acro only $30\%$ faster in small $w$. In the same setting, {\sc Tim+}  takes 1.5 hours for {\tt LiveJournal}, could not finish {\tt Orkut}; crashing after consuming all memory available. 
+For $w=0.1$, \acro is much faster than all other methods and still providing high-quality results. While all methods are struggling with problem size, \acro is converging results much faster, even faster than previous experiment settings. Also, memory consumption stays the same for all experimental settings, much smaller than other methods.
 
 \section{Related Work}\label{sec:relatedwork}
 
@@ -773,7 +763,7 @@ Cohen\cite{cohen2015all} presented the Historic Inverse Probability (HIP) estima
 Kumar and Calders\cite{kumar2017information} proposed Time Constrained Information
 Cascade Model and an influence maximization algorithm that works on the model using versioned HyperLogLog sketches. The algorithm performs the influence reachability sets for all vertices in an interaction graph performing a single pass over the data. Sketches build for each time window to estimate active edges where as \acro builds sketches for each vertex to estimate the cumulative influence of the latent seed set. \acro also utilizes fused sampling and error adaptive rebuilding of sketches.
 
-\section{Conclusion \ggx{and Future Work}}\label{sec:conclusion}
+\section{Conclusion and Future Work}\label{sec:conclusion}
 
 In conclusion, we propose a sketch-based Influence Maximization algorithm that employs fused sampling and error-adaptive rebuilding. We provide a fast implementation of the algorithm that utilizes multi-threading to exploit multiple CPU cores. In addition, we present a performance comparison with state-of-the-art IM algorithms on real-world datasets. 
 With the proposed method, \acro{} can achieve $\maxspeedupSKIM\times$ speed-up against {\sc Skim} and $\maxspeedupIMM\times$ speed-up against {\sc Imm} while producing high quality results. 
