@@ -380,6 +380,15 @@ In Greedy algorithm\cite{kempe2003maximizing} for each candidate vertex, influen
 
 After diffusion, the following process is repeated until $K$ vertices are added to the seed set; For all vertex, $u$ reachability set cardinalities, $R_G(S\cup u)$, estimated by merging $mask$ and their sketch registers. The $mask$ used for the sketch of $R_G(S)$ and initialized with zeros. Vertex with maximum cardinality is selected to add to the seed set. Then, the actual Monte-Carlo simulations were performed to compute the reachability set of the seed set. Having actual $R_G(S)$ allows both to calculate estimation errors and to find blocked vertices for all simulations. Blocked vertices skipped in the diffusion step in coming iterations. Besides, the real influence score allows us to know when to rebuild our sketch when the sketches have gone stale.
 
+
+\begin{figure*}[!ht]
+    \begin{center}
+    \includegraphics[width=\linewidth]{images/sketch-diffusion.pdf}
+    \caption{(a) The initial state on the toy graph for \acro{}; all vertices have set as live(green) and their registers initialized with leading zero count of their hashes. (b) 
+    % For all live edges,$e_{ij}$, respective registers are merged and set to source vertex $j$'s register, $M_j \leftarrow Max(M_i, M_j)$. 
+    For the live edge between Vertex 1 and 4, the register is set to the maximum of the respective register. Since the first register of vertex 1 is bigger, we only update the second register. Also, the edge between vertex 4 and 3 is only live in simulation 2, so we only set the maximum of those two registers to vertex 4's second register. Notice that, we are moving registers in reverse, from target to source of the edges. We set vertices 1 and 4 as live(green) since their registers have changed in this iteration (c) Vertex 1's register is updated and set as live again since vertex 4's registers are changed.  (d) All vertices have registers converged, there are no live vertices. }\label{fig:hf-processing} 
+    \end{center}
+    \end{figure*}
 \subsection{Error-Adaptive Sketch Rebuilding}
 
 Sketches are very fast approximation methods that often provide less than gold standard results. In our case, sketches are very competent at finding the first few vertices. But, after sketch registers saturate with high values, we observe a significant drop in the quality of results. Register saturation causes the naive count-distinct sketch method to not distinguish between vertices. 
@@ -404,23 +413,28 @@ and the marginal gain estimation error after the last sketch is larger than a lo
 Before rebuilding stale sketches, the reachability set of latent seed set,$R_G(S')$, is marked as visited, 
 and considered blocked in their respective simulations while rebuilding the sketches. Then, sketches are rebuild using Monte-Carlo simulations. After rebuilding, $mask$, which holds the cardinality estimate of the seed vertices added after the last rebuild, is cleared with all zeros.
 
-Two threshold values allow the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. 
+The use of two threshold values allows the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. 
 If a rebuild is not required, we only update the $mask$ by merging it with the candidate vertex's sketch. 
 This approach allows us to keep sketches high quality even after many vertices are added to the seed set, but on the other hand, forces us to perform Monte-Carlo simulations which can be expensive. We reuse the reachability sets of latent seed set, $R_G(S')$, computed by Monte-Carlo simulations. While rebuilding sketches, $R_G(S')$ is used to check whether if a vertex is blocked in a sample.
 
 Other methods mentioned in this paper, doesn't report time spend on calculating the influence scores, 
 whereas our method includes the time since it is crucial for keeping sketches in high quality.
 
+\begin{figure*}[!h]
+    \begin{center}
+        \includegraphics[width=0.33\linewidth]{images/heatmap_LiveJournal_time.pdf}
+        \includegraphics[width=0.33\linewidth]{images/heatmap_Orkut_time.pdf}
+        \includegraphics[width=0.33\linewidth]{images/heatmap_Pokec_time.pdf}\\
+        
+        \includegraphics[width=0.33\linewidth]{images/heatmap_LiveJournal_score.pdf}
+        \includegraphics[width=0.33\linewidth]{images/heatmap_Orkut_score.pdf}
+        \includegraphics[width=0.33\linewidth]{images/heatmap_Pokec_score.pdf}\\
+    \end{center}
+    \caption{Effect of $\epsilon$ parameters on \acro's performance.}\label{fig:parameter-smallmultiples} 
+\end{figure*}    
 
-\begin{figure*}[!ht]
-\begin{center}
-\includegraphics[width=\linewidth]{images/sketch-diffusion.pdf}
-\caption{(a) The initial state on the toy graph for \acro{}; all vertices have set as live(green) and their registers initialized with leading zero count of their hashes. (b) 
-% For all live edges,$e_{ij}$, respective registers are merged and set to source vertex $j$'s register, $M_j \leftarrow Max(M_i, M_j)$. 
-For the live edge between Vertex 1 and 4, the register is set to the maximum of the respective register. Since the first register of vertex 1 is bigger, we only update the second register. Also, the edge between vertex 4 and 3 is only live in simulation 2, so we only set the maximum of those two registers to vertex 4's second register. Notice that, we are moving registers in reverse, from target to source of the edges. We set vertices 1 and 4 as live(green) since their registers have changed in this iteration (c) Vertex 1's register is updated and set as live again since vertex 4's registers are changed.  (d) All vertices have registers converged, there are no live vertices. }\label{fig:hf-processing} 
-\end{center}
-\end{figure*}
-
+Our method's performance, both in terms of speed and quality of results, depends on parameter selection. 
+Even though,  
 
 \begin{algorithm}
 \caption{\sc{\acro}($G,K,J$)}
