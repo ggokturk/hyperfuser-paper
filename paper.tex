@@ -407,7 +407,7 @@ Even though at first few vertices expected influence is comparable, we see obser
 
 Since building sketches with \acro is very fast, we exploit this by rebuilding sketches after observing large cardinality estimation errors.
 After adding vertices to the seed set, \acro performs Monte-Carlo simulations to estimate the reachability of the latent seed set.
-The sketches are assumed as stale if the absolute error in estimated total influence score is more than the global threshold, $\epsilon_{global}$, 
+The sketches are assumed as stale if the absolute error in the estimated total influence score is more than the global threshold, $\epsilon_{global}$, 
 and the marginal gain estimation error after the last sketch is larger than a local threshold $\epsilon_{local}$. 
 
 Before rebuilding stale sketches, the reachability set of latent seed set,$R_G(S')$, is marked as visited, 
@@ -435,7 +435,7 @@ whereas our method includes the time since it is crucial for keeping sketches in
 
 Since, $\epsilon_local$ is the maximum error allowed after the last rebuild. Setting $\epsilon_local$ to $0$ means that \acro will always rebuild sketches, which would slowdown the method but it will give the best possible results. Conversely, setting $\epsilon_local$ to infinity will be very fast, since sketches are build only once without checking vertices blocked. But, the result quality will suffer. $\epsilon_global$, on the other hand, is the minimum influence we expected to obtain via building the sketch. If we were to set $\epsilon_global$ to 0, \acro will not rebuild the sketches, but when $\epsilon_global$ is set to infinity, we skill need to compare $\epsilon_local$ to estimation error before rebuilding.
 
-Even though, \acro's behavior is not chaotic with respect to changes in parameters. Our method's performance, both in terms of speed and quality of results, depends on parameter selection. We conducted a grid search over several parameter combinations to illustrate how \acro performs with different parameters. In figure~\ref{fig:parameter-smallmultiples}, both speed and quality of results on some of the largest datasets we have experimented is shown.  We found that, the parameters $\epsilon_{local}=0.3$ and $\epsilon_{global}=0.01$ used in our experiments, performs decent in many datasets, both in terms of speed and quality.
+Even though, \acro's behavior is not chaotic with respect to changes in parameters. The performance, both in terms of speed and quality of results, depends on parameter selection. We conducted a grid search over several parameter combinations to illustrate how \acro performs with different parameters. In figure~\ref{fig:parameter-smallmultiples}, both the speed and the quality of results on some of the largest datasets we have experimented is shown.  We found that the parameters $\epsilon_{local}=0.3$ and $\epsilon_{global}=0.01$, used in our experiments, performs decent in many datasets, both in terms of speed and quality.
 
 
 \begin{algorithm}
