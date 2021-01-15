@@ -20,6 +20,11 @@
 \usepackage{placeins}
 \usepackage{enumitem}
 %%%%%%
+% add seconds to fig 7
+% fix yaxis
+% table 3-5 son satir 3-5
+% fontlari buyult, relative score/time , fig 10 11
+% notation
 % Notes: 
 % plot grouping/hue +
 % table smallcaps +
@@ -194,9 +199,9 @@ $w_{u,v}$ can be determined either by the diffusion model or according to the st
         $\varsigma $    & Influence gained before last sketch build\\
         $\sigma $       & Influence Score\\
         $\delta$        & Marginal Gain after last sketch build\\
-        $\epsilon_{global}$    & Global estimation error threshold\\
-        $\epsilon_{local}$    & Local estimation error threshold\\ 
-        $\epsilon_{conv}$    & Non-convergenced vertex threshold\\
+        $\epsilon_{g}$    & Global estimation error threshold\\
+        $\epsilon_{l}$    & Local estimation error threshold\\ 
+        $\epsilon_{c$    & Non-convergenced vertex threshold\\
       %  $x[[i, j]]$   & Slice of vector  $x$ between indices $i$ and $j$, not including $j$ \\ 
         \hline         
     \end{tabular}
@@ -439,7 +444,7 @@ whereas our method includes the time since it is crucial for keeping sketches in
     \label{fig:conv-perf}} 
 \end{figure}
 
-Since, $\epsilon_local$ is the maximum error allowed after the last rebuild. Setting $\epsilon_local$ to $0$ means that \acro will always rebuild sketches, which would slowdown the method but it will give the best possible results. Conversely, setting $\epsilon_local$ to infinity will be very fast, since sketches are build only once without checking vertices blocked. But, the result quality will suffer. $\epsilon_global$, on the other hand, is the minimum influence we expected to obtain via building the sketch. If we were to set $\epsilon_global$ to 0, \acro will not rebuild the sketches, but when $\epsilon_global$ is set to infinity, we skill need to compare $\epsilon_local$ to estimation error before rebuilding.
+Since, $\epsilon_{l}$ is the maximum error allowed after the last rebuild. Setting $\epsilon_{l}$ to $0$ means that \acro will always rebuild sketches, which would slowdown the method but it will give the best possible results. Conversely, setting $\epsilon_local$ to infinity will be very fast, since sketches are build only once without checking vertices blocked. But, the result quality will suffer. $\epsilon_{g}$, on the other hand, is the minimum influence we expected to obtain via building the sketch. If we were to set $\epsilon_{l}$ to 0, \acro will not rebuild the sketches, but when $\epsilon_{l}$ is set to infinity, we skill need to compare $\epsilon_{l}$ to estimation error before rebuilding.
 
 Even though, \acro's behavior is not chaotic with respect to changes in parameters. The performance, both in terms of speed and quality of results, depends on parameter selection. We conducted a grid search over several parameter combinations to illustrate how \acro performs with different parameters. In figure~\ref{fig:parameter-smallmultiples}, both the speed and the quality of results on some of the largest datasets we have experimented is shown.  We found that the parameters $\epsilon_{local}=0.3$ and $\epsilon_{global}=0.01$, used in our experiments, performs decent in many datasets, both in terms of speed and quality.
 
@@ -470,7 +475,7 @@ Even though, \acro's behavior is not chaotic with respect to changes in paramete
         \State {Compute seed set $S$'s Reachability set $R_{G}(S)$ }
         \State $\sigma_G(S) \leftarrow |R_{G}|/J$
         \State $\delta = \sigma - \varsigma$
-        \If{$ (e - \delta) / \delta < \epsilon_l \lor |e-\delta| / \sigma < \epsilon_g$}
+        \If{$ |(e - \delta) / \delta| < \epsilon_l \lor |e-\delta| / \sigma < \epsilon_g$} %FIXME
             \State $mask \leftarrow merge(mask,M_s)$
         \Else
             \For{$ v\in V$} {\bf in parallel}
