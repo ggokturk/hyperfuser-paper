@@ -20,24 +20,7 @@
 \usepackage{placeins}
 \usepackage{enumitem}
 %%%%%%
-% add seconds to fig 7
-% fix yaxis
-% table 3-5 son satir 3-5
-% fontlari buyult, relative score/time , fig 10 11
-% notation
-% Notes: 
-% plot grouping/hue +
-% table smallcaps +
-% Time score memory center +
-% Abstract
-% Differences between infuser and us+
-% time skecth diff between us +
-% neden 0.005 +
-% active vertex colors +
-
-% GRID PARAM SEARCH
-% Performance comparison vs others (why slowed down?)
-% Error-Adaptive rebuilding sat
+% notation 
 %%%%%
 \ifCLASSOPTIONcompsoc
   \usepackage[nocompress]{cite}
@@ -92,7 +75,7 @@ pdfkeywords={Influence Maximization, Graph Processing, Graph Sampling, Fused Sam
 
 \IEEEtitleabstractindextext{%
 \begin{abstract}
-Influence maximization~(IM) is the problem of finding a seed vertex set that maximizes the expected number of vertices influenced under a given diffusion model. Due to the NP-Hardness of finding an optimal seed set, approximation methods are frequently used for IM. In addition to high-quality yet expensive approximation algorithms, to meet with the scale of today's networks, lightweight, sketch-based approaches, which do not simulate the process exactly, have been proposed in the literature. As expected, the quality of the seed sets for the latter is inferior to those of the former. In this work, we describe a fast, error-adaptive approach that leverages Count-Distinct sketches and the recently proposed hash-based, fused sampling. To estimate the vertex set sizes influenced throughout the simulations, we use per-vertex Flajolet-Martin sketches where each sketch register corresponds to a sample sub-graph. During the diffusion simulations, the reach set cardinalities of a single vertex are stored in adjacent registers in memory. This allows the proposed algorithm to find the number of influenced vertices in a single simulation step in different simulations at once. In addition, thanks to its efficiency and scalability of our parallel implementation can rebuild the sketches after observing large estimation errors. Our experimental results show that the proposed method finds high-quality seed sets  while being up-to $1.7\times$--$27.9\times$ faster on average than a state-of-the-art approximation algorithm. In addition, it is shown to be $3.5\times$--$11.1\times$ faster than a sketch-based approach while producing seed sets with $3\%$--$12\%$ better influence scores.
+Influence maximization~(IM) is the problem of finding a seed vertex set that maximizes the expected number of vertices influenced under a given diffusion model. Due to the NP-Hardness of finding an optimal seed set, approximation methods are frequently used for IM. In addition to high-quality yet expensive approximation algorithms, to meet with the scale of today's networks, lightweight, sketch-based approaches, which do not simulate the process exactly, have been proposed in the literature. As expected, the quality of the seed sets for the latter is inferior to those of the former. In this work, we describe a fast, error-adaptive approach that leverages Count-Distinct sketches and the recently proposed hash-based, fused sampling. To estimate the vertex set sizes influenced throughout the simulations, we use per-vertex Flajolet-Martin sketches where each sketch register corresponds to a sample sub-graph. During the diffusion simulations, the reach set cardinalities of a single vertex are stored in adjacent registers in memory. This allows the proposed algorithm to find the number of influenced vertices in a single simulation step in different simulations at once. In addition, thanks to its efficiency and scalability of our parallel implementation can rebuild the sketches after observing large estimation errors. Our experimental results show that the proposed method finds high-quality seed sets while being up-to $1.7\times$--$27.9\times$ faster on average than a state-of-the-art approximation algorithm. In addition, it is shown to be $3.5\times$--$11.1\times$ faster than a sketch-based approach while producing seed sets with $3\%$--$12\%$ better influence scores.
 \end{abstract}
 % Note that keywords are not normally used for peer review papers.
 }
@@ -113,7 +96,7 @@ Influence maximization~(IM) is the problem of finding a seed vertex set that max
 
 The study of efficient information/influence propagation in networks becomes an important area of research with several applications from many fields, such as viral marketing~\cite{leskovec2007dynamics, trusov2009effects}, social media analysis~\cite{zeng2010social, moreno2004dynamics}, and recommendation systems~\cite{lu2012recommender}.
 As the study of these networks is imperative for educational, political, economic, and social purposes, a high-quality seed set to initiate the diffusion may have critical importance.
-Furthermore, since the diffusion analysis may be time-critical, or increasing its coverage may be expensive in terms of computing resources and time, novel and efficient approaches to find good vertex sets that propagates the information/influence effectively is essential.
+Furthermore, since the diffusion analysis may be time-critical, or increasing its coverage may be expensive in terms of computing resources and time, novel and efficient approaches to find good vertex sets that propagate the information/influence effectively are essential.
 
 Influence maximization is the problem of finding a subset $S \subset V$ of $K$ vertices in a graph $G = (V, E)$ with the vertex set $V$ and edge set $E$ such that $S$ reaches the maximum reachability under some diffusion model $M$. In addition to introducing the problem, Kempe et al.~\cite{kempe2003maximizing} proved it to be NP-hard and provided a greedy Monte-Carlo approach that has a constant approximation for the optimal solution. This greedy approach is one of the most frequently applied algorithms for IM. The time complexity of the greedy algorithm, estimating the $\sigma$ influence score, running $R$ simulations, and selecting $K$ seed vertices is $\mathcal{O}(KRn\sigma)$ for a graph with $n$ vertices. Although they perform well in terms of seed-set quality, in consequence, the greedy Monte-Carlo solutions are impractical for real-life networks featuring millions of vertices. Due to this reason, many heuristics and proxy methods have been proposed in the literature~\cite{MixGreedy, narayanam2010shapley, kimura2007extracting, chen2010PMIA,chen2010LDAG, kim2013scalable, cohen2014sketch, goyal2011simpath, jung2012irie,cheng2014imrank,liu2014influence,galhotra2016holistic}.
 
@@ -122,8 +105,7 @@ Influence maximization is the problem of finding a subset $S \subset V$ of $K$ v
  
 % However, these simulation-based, greedy algorithms provide the best possible approximation guarantees. Therefore they are considered as the gold standard for IM.  
 
-Simulating a greedy algorithm in parallel is an obvious and straightforward workaround to reduce the execution time of IM kernels and make them scalable for large-scale networks. However, for large networks, a greedy approach with a good approximation guarantee does not come cheap even if a large number of processing units/cores are available on networks with billions of vertices and edges. Following similar attempts in the literature, we propose a parallel, sketch-based greedy approach that approximates the Monte-Carlo processes. The proposed approach does not exactly count the number of influenced vertices. Instead, it leverages Count-Distinct sketches. 
-in this work, we apply parallelism in multiple levels; thread-level and instruction-level parallelism. While modern compilers employ instruction-level parallelism effectively and automatically for applications with regular memory access patterns, graph kernels are usually harder to deal with. The irregularity of the neighbor IDs. ..... due to their irregular memory access patterns, it is not a straightforward task for graph processing kernels.  Besides, vectorization attempts on such kernels typically fail to provide substantial speed-up in performance. 
+Simulating a greedy algorithm in parallel is a straightforward workaround to reduce the execution time of IM kernels and make them scalable for large-scale networks. However, for large networks, a greedy approach with a good approximation guarantee does not come cheap even if a large number of processing units/cores are available on networks with billions of vertices and edges. Following similar attempts in the literature, we propose a parallel, sketch-based greedy approach that approximates the Monte-Carlo processes. The proposed approach does not exactly count the number of influenced vertices. Instead, it leverages Count-Distinct sketches. 
 
 In this work;
 \begin{itemize}[leftmargin=*]
@@ -135,8 +117,6 @@ That is when the simulations traverse the same edge within close time intervals,
 %\item In addition to instruction-level parallelism, we parallelize \acro on multi-core architectures.
 
 \item \acro{} can process very large graphs with millions of vertices and hundreds of millions of edges under a minute, without compromising the quality of results. For large graphs, due to its race condition indifferent nature, performance scales near linearly with the number of threads available. While processing the graph, only we few GBs of memory is used, mostly for storing the graph itself. 
-
-% \item \acro can be around $200000\times$ faster compared to the traditional greedy approaches. It is usable on large graphs that have been considered as {\em too large} in the literature. For instance, the new algorithm runs in $2.09$, $0.08$, $0.36$ seconds on networks {\tt Amazon}, {\tt NetHEP}, {\tt NetPhy} with 16 threads where the sequential baseline takes $141.3$, $259.1$ and $1725.2$ seconds, respectively. In fact, with a 302,400 seconds~(3.5 days) timeout, the sequential baseline can process only the above-mentioned 3 (out of 12) real-life graphs, having 1.2M, 58.9K and 231.5K edges. On the other graphs, the original algorithm cannot complete the simulations within the time limit. However, \acro{} completes all of 12 graphs around 1200 seconds in total, where the maximum is 654 seconds for the {\tt Orkut} network having 3.1M vertices and 117.2M edges. 
 
 \item We evaluate the performance, memory consumption, and influence score with a state-of-the-art influence maximization algorithms {\sc Skim}~\cite{cohen2014sketch}, {\sc Tim+}~\cite{tim}, {\sc Imm}~\cite{minutoli2019fast} in order to accurately position the performance of \acro{} in the IM literature. The experiments show that \acro is $\minspeedup\times$—$\maxspeedup\times$ faster than state-of-the-art while still being better in comparison in terms of scores, and using a comparable amount of memory.
 
@@ -201,7 +181,7 @@ $w_{u,v}$ can be determined either by the diffusion model or according to the st
         $\delta$        & Marginal Gain after last sketch build\\
         $\epsilon_{g}$    & Global estimation error threshold\\
         $\epsilon_{l}$    & Local estimation error threshold\\ 
-        $\epsilon_{c$    & Non-convergenced vertex threshold\\
+        $\epsilon_{c}$    & Non-convergenced vertex threshold\\
       %  $x[[i, j]]$   & Slice of vector  $x$ between indices $i$ and $j$, not including $j$ \\ 
         \hline         
     \end{tabular}
@@ -236,7 +216,7 @@ In the literature, {\em independent} and {\em weighted cascade}~(IC and WC), and
 \item The {\bf Independent Cascade} process performs in iterations and activates the $v$ vertex if one of its (incoming) edges, $(u, v)$, is 
 used during the iteration of diffusion, which has an expected probability of $w_{u, v}$, because $u$ was already influenced in the previous rounds. 
 Activation probabilities are independent (from each other and previous activations) in the {\em independent} variant which we concentrate on in this paper, as in Figure~\ref{fig:ic}.
-In theory, there can exist parallel and  independent $\{u, v\}$ edges in $E$. In practice, they are merged to a single $\{u,v\}$ edge via preprocessing. 
+In theory, there can exist parallel and  independent $\{u, v\}$ edges in $E$. In practice, they are merged to a single $\{u,v\}$ edge via pre-processing. 
 
 \item The {\bf Weighted Cascade}  model is a variant of the independent cascade that uses the structural properties of vertices to set weights as shown in Figure~\ref{fig:wc}.
 The method, as described in ~\cite{MixGreedy}, sets $w_{u, v} = 1 / d_v$ where $d_v$ is the number 
@@ -250,18 +230,10 @@ All the $\{u, v\}$~(or $(u, v)$ in the directed graph) edges
 with active $u$ vertices are taken into account in the process. Vertex $v$ is activated~\cite{kempe2003maximizing} when the number of these edge weights reaches $\theta v$.  
 Therefore, the cascade models are special variants of the linear threshold model with $\theta v = 0 $. 
 
-%Each edge $e=(s,v) \in E$ has a weight $w_{s,v}$. Each vertex $v$ has incoming edge list $Adj^{-1}(v)$ and $\sum_{s\in Adj^{-1}(v) }{w_{s,v}} \leq 1$. Also, each vertex $v$ has associated with a threshold $\theta_v$. Initially, $\theta$ is sampled uniformly, and seed set is set as activated. Then, until convergence is reached simulation ran to transfer $w_ij$ values from activated vertices to their neighborhoods, activating each vertex $v$ that reach $\theta_v$ value. Weights can be uniform i.e 0.1, 0.01, or 0.001 for all edges, as we observed in many work. 
-
 \item {\bf Triggering} proposed by Kempe et al.\cite{kempe2003maximizing} to generalize of previous models mentioned above. In the triggering model, each neighbor has a probability to influence vertex $v$. The diffusion process chooses a random subset of vertices called the "triggering set" to activate vertices at each instance.
 \end{itemize}
 
-The complexity analysis stays consistent for many diffusion models including {\em Independent Cascade}~(IC), {\em Linear Threshold}~(LT),  models. 
-% Current studies focus on reducing the number of simulations run \cite{goyal2011celf++, goyal2011simpath}, sketch-based speedup methods\cite{SKIM}, and proxy methods that solve similar yet simpler problems \cite{kempe2003maximizing}. %FIXME too many methods, one french paper in python
-%\cite{kempe2003maximizing} 
-We concentrate on the independent cascade model in this paper, but the proposed methods are also relevant to the other models in the literature.
-%  \[ \sigma(S^*)=\argmax_{S\subseteq V \land |S| \leq k } \sigma_{G}(S) \]
-
-%is a simple diffusion model that Vertex v can be activated by any of incoming edges from activated vertices w with probability $p$. Given a seed set $S$ and influence probability $p$, the cascade model starts from the activated seed set and tries to diffuse until each of the out-going edges of active vertices are considered. The diffusion process considers all edges only once.
+The complexity analysis stays consistent for many diffusion models including {\em Independent Cascade}~(IC), {\em Linear Threshold}~(LT),  models. We concentrate on the independent cascade model in this paper, but the proposed methods are also relevant to the other models in the literature.
 
 \subsection{Count-Distinct Sketch}\label{sec:sketch}
 The count-distinct problem is the problem of finding the number of distinct elements in a stream with non-distinct elements. Computing reachability sets of a vertex is a similar problem; the cardinality of all vertices visited is calculated while traversing sample sub-graphs from the given vertex. Exact cardinality calculations require memory proportional to the cardinality. 
@@ -273,12 +245,12 @@ MixGreedy method goes one step further; it utilizes that all vertices in a conne
 
 For directed graphs, storing reachability sets for all vertices and merging these sets are infeasible for non-trivial graphs. 
 If one-hot vectors are used to store reachability sets for constant insertion time, $O(n^2\mathcal{R})$ bits of memory is required and each merge operation has $O(n)$ time complexity. 
-if Disjoints sets are used for storing reachability sets; $(n\bar{\sigma}\mathcal{R})$ memory is required to store all reachability sets, and each merge operation has $O(ackermann'(\sigma))$ complexity.
+if Disjoints sets are used for storing reachability sets; $(n\bar{\sigma}\mathcal{R})$ memory is required to store all reachability sets, and each merge operation has $O(Ackermann'(\sigma))$ complexity.
 
 Count-distinct sketches have nice properties for such problems; Flajolet–Martin algorithm\cite{flajolet1985probabilistic} can estimate the cardinality of distinct elements in reachability sets with a constant number of registers($J$), and most importantly union of these sets can be done in a constant number of operations.
 
 
-Flajolet–Martin algorithm only stores how rare elements are in a multi-set.The rarity of the elements is often computed by counting leading zeros in the item's hash values.  The registers are initialized with zero values in beginning. Items are added by storing the longest leading zero count. Cardinality estimation can be done by taking 2 to the power of the stored value. Multiple registers and hash functions, $M[j]$ and $h_j$, are commonly used to reduce variance.
+Flajolet–Martin algorithm only stores how rare elements are in a multi-set.The rarity of the elements is often computed by counting leading zeros in the item's hash values.  The registers are initialized with zero values in the beginning. Items are added by storing the longest leading zero count. Cardinality estimation can be done by taking 2 to the power of the stored value. Multiple registers and hash functions, $M[j]$ and $h_j$, are commonly used to reduce variance.
 Adding item $x$ to sketch $M$, and its result $M'$ is shown in equation~\ref{eq:sketch-add}.
 
 \begin{equation}
@@ -391,7 +363,7 @@ After diffusion, the following process is repeated until $K$ vertices are added 
     \includegraphics[width=\linewidth]{images/sketch-diffusion.pdf}
     \caption{(a) The initial state on the toy graph for \acro{}; all vertices have set as live(green) and their registers initialized with leading zero count of their hashes. (b) 
     % For all live edges,$e_{ij}$, respective registers are merged and set to source vertex $j$'s register, $M_j \leftarrow Max(M_i, M_j)$. 
-    For the live edge between Vertex 1 and 4, the register is set to the maximum of the respective register. Since the first register of vertex 1 is bigger, we only update the second register. Also, the edge between vertex 4 and 3 is only live in simulation 2, so we only set the maximum of those two registers to vertex 4's second register. Notice that, we are moving registers in reverse, from target to source of the edges. We set vertices 1 and 4 as live(green) since their registers have changed in this iteration (c) Vertex 1's register is updated and set as live again since vertex 4's registers are changed.  (d) All vertices have registers converged, there are no live vertices. }\label{fig:hf-processing} 
+    For the live edge between Vertex 1 and 4, the register set to the maximum of the respective register. Since the first register of vertex 1 has a larger value, we only update the second register. Also, the edge between vertex 4 and 3 is only live in simulation 2, so we only set the maximum of those two registers to vertex 4's second register. Notice that we are moving registers in reverse, from target to source of the edges. We set vertices 1 and 4 as live(green) since their registers have changed in this iteration (c) Vertex 1's register is updated and set as live again since vertex 4's registers are changed.  (d) All vertices have registers converged, there are no live vertices. }\label{fig:hf-processing} 
     \end{center}
     \end{figure*}
 \subsection{Error-Adaptive Sketch Rebuilding}
@@ -412,10 +384,10 @@ Even though at first few vertices expected influence is comparable, we see obser
 
 Since building sketches with \acro is very fast, we exploit this by rebuilding sketches after observing large cardinality estimation errors.
 After adding vertices to the seed set, \acro performs Monte-Carlo simulations to estimate the reachability of the latent seed set.
-The sketches are assumed as stale if the absolute error in the estimated total influence score is more than the global threshold, $\epsilon_{global}$, 
-and the marginal gain estimation error after the last sketch is larger than a local threshold $\epsilon_{local}$. 
+The sketches are assumed as stale if the absolute error in the estimated total influence score is more than the global threshold, $\epsilon_{g}$, 
+and the marginal gain estimation error after the last sketch is larger than a local threshold $\epsilon_{l}$.
 
-Before rebuilding stale sketches, the reachability set of latent seed set,$R_G(S')$, is marked as visited, 
+Before rebuilding stale sketches, the reachability set of latent seed set, $R_G(S')$, is marked as visited, 
 and considered blocked in their respective simulations while rebuilding the sketches. Then, sketches are rebuild using Monte-Carlo simulations. After rebuilding, $mask$, which holds the cardinality estimate of the seed vertices added after the last rebuild, is cleared with all zeros.
 
 The use of two threshold values allows the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. 
@@ -427,13 +399,24 @@ whereas our method includes the time since it is crucial for keeping sketches in
 
 \begin{figure*}[!h]
     \begin{center}
+        \subfloat[LiveJournal execution time in seconds\label{fig:lj-time}]{%
         \includegraphics[width=0.33\linewidth]{images/heatmap_LiveJournal_time.pdf}
+    }
+    \subfloat[Orkut execution time in seconds\label{fig:orkut-time}]{%
         \includegraphics[width=0.33\linewidth]{images/heatmap_Orkut_time.pdf}
-        \includegraphics[width=0.33\linewidth]{images/heatmap_Pokec_time.pdf}\\
-        
+        }
+    \subfloat[Pokec execution time in seconds\label{fig:pokec-time}]{%
+        \includegraphics[width=0.33\linewidth]{images/heatmap_Pokec_time.pdf}
+        }\\
+        \subfloat[LiveJournal Influence Score\label{fig:lj-score}]{%
         \includegraphics[width=0.33\linewidth]{images/heatmap_LiveJournal_score.pdf}
+        }
+    \subfloat[Orkut Influence Score\label{fig:lj-score}]{%
         \includegraphics[width=0.33\linewidth]{images/heatmap_Orkut_score.pdf}
-        \includegraphics[width=0.33\linewidth]{images/heatmap_Pokec_score.pdf}\\
+        }
+    \subfloat[Pokec Influence Score\label{fig:pokec-score}]{%
+        \includegraphics[width=0.33\linewidth]{images/heatmap_Pokec_score.pdf}
+        }\\
     \end{center}
     \caption{Effect of $\epsilon$ parameters on \acro($J=256$, $\epsilon_c=0.02$) performance, using $\tau=18$ threads.}\label{fig:parameter-smallmultiples} 
 \end{figure*}    
@@ -651,7 +634,7 @@ Dataset      &            &         &        &       &            &         &   
 {\tt Twitter}      &       1.10 &  171.17 &   5.40 &  1.60 &     3458.7 &  1.006x &  0.990x &  0.942x &       0.09 &  2.02 & 0.12 & 0.15 \\
 {\tt Youtube}      &       1.95 &   46.61 &   2.42 & 13.24 &     1820.8 &  1.025x &  1.013x &  1.000x &       0.73 &  3.96 & 0.48 & 1.39 \\
 \bottomrule
-Geo. Mean wrt.&1.00x&28.19x&1.69x&3.46x&1.00x&1.03x&1.00x&0.90x&1.00x&22.75x&1.65x&3.58x \\ \acro
+Geo. Mean wrt.&1.000x&28.191x&1.687x&3.465x&1.000x&1.032x&1.002x&0.899x&1.000x&22.750x&1.650x&3.581x \\ \acro
 \end{tabular}
 
     }
@@ -687,7 +670,7 @@ Dataset      &            &         &         &        &            &         & 
 {\tt Twitter }      &       0.90 &  390.36 &   10.96 &   1.22 &     9628.6 &  1.004x &  0.992x &  0.978x &       0.09 &  4.91 &  0.23 & 0.09 \\
 {\tt Youtube }      &       2.18 &  534.41 &   14.86 &  16.97 &     9042.7 &  1.009x &  0.994x &  1.006x &       0.73 &  7.10 &  0.48 & 1.73 \\
 \bottomrule
-Geo. Mean wrt.&1.00x&100.14x&5.45x&3.58x&1.00x&1.02x&1.00x&0.88x&1.00x&36.26x&1.91x&2.82x \\ \acro
+Geo. Mean wrt.&1.000x&100.140x&5.448x&3.582x&1.000x&1.016x&0.996x&0.879x&1.000x&36.264x&1.909x&2.820x \\ \acro
 \end{tabular}
 
 
@@ -719,7 +702,7 @@ Dataset      &            &         &         &        &            &         & 
 {\tt Twitter }      &       0.33 & 1897.50 &   16.09 &   1.62 &    55327.3 &  1.000x &  0.998x &  0.998x &       0.09 &  34.56 &  1.04 & 0.05 \\
 {\tt Youtube }      &       1.12 & 7158.56 &   60.59 &  30.57 &   171392.9 &  1.000x &  0.999x &  1.001x &       0.73 & 139.12 &  4.19 & 2.88 \\
 \bottomrule
-Geo. Mean wrt.&1.00x&1449.41x&27.87x&11.06x&1.00x&1.00x&1.00x&0.97x&1.00x&163.77x&7.14x&2.63x \\ \acro
+Geo. Mean wrt.&1.000x&1449.408x&27.870x&11.062x&1.000x&1.002x&0.996x&0.972x&1.000x&163.771x&7.145x&2.634x \\ \acro
 \end{tabular}
 
 
@@ -780,7 +763,7 @@ Techniques such as using GPUs\cite{IMGPU,curipples}, sketches for finding set in
 
 Sketch-based influence maximization improves theoretical efficiency against simulation-based methods. The sketch-based approach pre-computes sketches for evaluating the influence spread instead of running simulations repetitively. One of the interesting methods for sketch-based influence maximization is {\sc Skim} ~\cite{cohen2014sketch} by Cohen~et~al. It constructs bottom-$K^2$ min-hash sketches to estimate the reachability and utilizes multi-core, multi-CPU parallelization. 
 
-Independent Path Algorithm~(IPA)~\cite{IPA} by Kim~et~al runs a proxy model and prunes paths with probabilities less than a given threshold. IPA uses {\tt OpenMP} to work on independent paths in parallel. The approach only keeps a dense but small part of the network and scalable on only sparse networks. Liu~et~al. proposed IMGPU~\cite{IMGPU}, an IM  estimation method by utilizing a bottom-up traversal algorithm. It performs a single Monte-Carlo simulation on many GPU threads to find the reachability of the seed set. It is $5.1\times$ faster than {\sc MixGreedy} on a CPU. The GPU implementation is up to $60\times$ faster with an average speedup of  $24.8\times$.
+Independent Path Algorithm~(IPA)~\cite{IPA} by Kim~et~al runs a proxy model and prunes paths with probabilities less than a given threshold. IPA uses {\tt OpenMP} to work on independent paths in parallel. The approach only keeps a dense but small part of the network and scalable on only sparse networks. Liu~et~al. proposed IMGPU~\cite{IMGPU}, an IM  estimation method by utilizing a bottom-up traversal algorithm. It performs a single Monte-Carlo simulation on many GPU threads to find the reachability of the seed set. It is $5.1\times$ faster than {\sc MixGreedy} on a CPU. The GPU implementation is up to $60\times$ faster with an average speed-up of  $24.8\times$.
 
 Borgs~et~al.~\cite{borgs2014maximizing} proposed Reverse Influence Sampling~(RIS) which samples a fraction of all random reverse reachable sets. Then it computes a set of $K$ seeds that covers the maximum number of those. The number of samples is calculated concerning the number of visited vertices. The algorithm has an approximation guarantee of $(1-1/e-\epsilon)$. Minutoli et al.~improved RIS and proposed {\sc Imm} that works on multi-threaded and distributed architectures~\cite{minutoli2019fast}. 
 Recently, the authors extended the algorithm to work on GPUs~\cite{curipples}.   
