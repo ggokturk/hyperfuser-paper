@@ -275,7 +275,24 @@ In this work, we utilize a variant of Flajolet–Martin sketch; since multiple M
 
 \section{Error-Adaptive Influence Maximization}\label{sec:method}
 
-\kktodo{burada bir giris gerekiyor - basit, 4-5 adimli bir algoritma, bir iki paragraf anlatim ne yapiyoruz, niye yapiyoruz}
+% \kktodo{burada bir giris gerekiyor - basit, 4-5 adimli bir algoritma, bir iki paragraf anlatim ne yapiyoruz, niye yapiyoruz} % gg:Anlatim ile aciklamayi birlestirdim.
+Most influence maximization methods have the same few steps to compute the seed set including; Sampling, building influence oracle, verifying candidates, then removing the residual reachability set of the latent seed set. \acro, on the other hand, fuses sampling step to other steps to accumulate memory accesses.
+
+\acro first performs a diffusion process; The process starts with per-vertex sketches that are initialized with their own vertices. 
+Then, for all edges sketch of the source vertex is merged with the target vertex until all registers converge. 
+The merge operation utilized in the process is slightly different from the conventional use and retrofitted to mimic the independent cascade diffusion model. 
+Registers of a sketch are assigned to a single sample/simulation; Merge operations are performed on the register only if both vertices are $live$ in the sample associated with the register. 
+This process relays reachability information between vertices. 
+At each iteration, all reachable vertices in a single step are added to the sketches. 
+Instead of performing diffusion for a single vertex/path/, all influence that passes through an edge in a single step is processed. 
+This dynamic programming like property allows us to estimate marginal influence for all vertices very fast. 
+After, \acro picks the vertex with the largest estimated reachability set by looking at sketches alone. 
+After, \acro calculates reachability sets of the latent seed set by performing Monte-Carlo simulations. 
+The Vertices in the reachability sets are labeled blocked in respective samples. 
+Finally, \acro computes whether to rebuild the sketches using the error between sketch estimate and Monte-Carlo estimate.  
+
+
+
 
 \subsection{Hash-based Fused Sampling}
 The probabilistic nature of cascade models requires sampling subgraphs $\hat{G}$ from $G = (V, E)$ to simulate the diffusion process. The sampling part of the algorithm can be a dominating factor in processing; sampling may demand multiple passes on the graph, if samples are memoized, multiple times of the graph size needs to be stored.
@@ -331,15 +348,16 @@ An efficient implementation of this approach will be discussed later in this sec
 Using a strong hash function such as {{\sc Murmur3}} ensures that all bits independently change if the input is changed. This property allows us to generate good enough pseudo-random values for fair sampling. To prove the fairness of random values generated with the hash-based approach, we generated a large number of samples for various real-life networks and graphed the bias of random values $P(u,v)_r$ used while sampling.
 
 % For a given graph $G = (V,E)$, the bias of a sampling probability $x$ is computed as $|(31/2) − E(|H(m)|) / E(|H(m)|))|$ for all $(u,v) \in E$ and $0 \leq r < R$. 
-Figure~\ref{fig:prob-bias} shows the bias for 12 real-life networks. The sampling probability distribution of hash-based computation is almost identical to the uniform distribution with small bias.
+% Figure~\ref{fig:prob-bias} shows the bias for 12 real-life networks. 
+The sampling probability distribution of hash-based computation is almost identical to the uniform distribution with small bias.
 
 
-\begin{figure}[!ht] 
-    \centering
-    \includegraphics[width=1\linewidth]{./images/bias.pdf}
-    \caption{Bias distribution of hash-based sampling probabilities on various real-life networks.}
-    \label{fig:prob-bias} 
-\end{figure}
+% \begin{figure}[!ht] 
+%     \centering
+%     \includegraphics[width=1\linewidth]{./images/bias.pdf}
+%     \caption{Bias distribution of hash-based sampling probabilities on various real-life networks.}
+%     \label{fig:prob-bias} 
+% \end{figure}
 
 %Traditional implementations sample each edge in $G$ once per simulation and store them to construct a sampled subgraph. n
 Being able to generate infinitely many samples on-the-fly allows us to avoid many memory accesses. The only downside of hash-based fused sampling is that we have to generate all random values,   $P(u,v)_r$, for each edge traversal.  Fortunately, these computations are quite fast on modern computing hardware.
@@ -356,7 +374,7 @@ Second, the diffusion process is performed between vertex sketches. All vertices
 In Greedy algorithm\cite{kempe2003maximizing} for each candidate vertex, influence diffusion computations are performed for each vertex.  On the other hand, diffusion on sketch registers allows finding all vertices reachability set. All vertices influence scores in a single-step distance only computed once. This dynamic programming like property allows fast selection of influence maximizing candidates. Only iterations as much as the diameter of sample graphs are required to converge the sketches. 
 
 
-After diffusion, the following process is repeated until $K$ vertices are added to the seed set; For all vertex, $u$ reachability set cardinalities, $R_G(S\cup u)$, estimated by merging $mask$ and their sketch registers. The $mask$ used for the sketch of $R_G(S)$ and initialized with zeros. Vertex with maximum cardinality is selected to add to the seed set. Then, the actual Monte-Carlo simulations were performed to compute the reachability set of the seed set. Having an actual $R_G(S)$ allows both to calculate estimation errors and to find blocked vertices for all simulations. Blocked vertices skipped in the diffusion step in coming iterations. Besides, the real influence score allows us to know when to rebuild our sketches when the sketches have gone stale.
+After diffusion, the following process is repeated until $K$ vertices are added to the seed set; For all vertex, $u$ reachability set cardinalities, $R_G(S\cup u)$, estimated by merging $M_S$ and their sketch registers. The $M_S$ used for the sketch of $R_G(S)$ and initialized with zeros. Vertex with maximum cardinality is selected to add to the seed set. Then, the actual Monte-Carlo simulations were performed to compute the reachability set of the seed set. Having an actual $R_G(S)$ allows both to calculate estimation errors and to find blocked vertices for all simulations. Blocked vertices skipped in the diffusion step in coming iterations. Besides, the real influence score allows us to know when to rebuild our sketches when the sketches have gone stale.
 
 
 \begin{figure*}[!ht]
@@ -389,10 +407,10 @@ The estimation error is calculated as the following; we store influence score af
 The sketches are assumed as stale if the absolute error in the estimated total influence score, $Err_g$, is more than the global threshold, $\epsilon_{g}$, 
 and the marginal gain estimation error, $Err_l$, after the last sketch is larger than a local threshold $\epsilon_{l}$.
 
-Before rebuilding stale sketches, the reachability set of the latent seed set, $R_G(S')$, is marked as visited and considered blocked in their respective simulations while rebuilding the sketches. Then, the sketches are rebuilt using Monte-Carlo simulations. After rebuilding, $mask$, which holds the cardinality estimate of the seed vertices added after the last rebuild, is cleared with all zeros.
+Before rebuilding stale sketches, the reachability set of the latent seed set, $R_G(S')$, is marked as visited and considered blocked in their respective simulations while rebuilding the sketches. Then, the sketches are rebuilt using Monte-Carlo simulations. After rebuilding, $M_S$, which holds the cardinality estimate of the seed vertices added after the last rebuild, is cleared with all zeros.
 
 The use of two threshold values allows the algorithm to rebuild after large local errors but skip rebuilding if the error is minuscule relative to the total score. 
-If a rebuild is not required, we only update $mask$ by merging it with the candidate vertex's sketch. 
+If a rebuild is not required, we only update $M_S$ by merging it with the candidate vertex's sketch. 
 This approach allows us to keep the sketches in high quality even after many vertices are added to the seed set. But on the other hand, it forces us to perform expensive Monte-Carlo simulations. 
 We reuse the reachability sets of the latent seed set, $R_G(S')$, computed by Monte-Carlo simulations. While rebuilding the sketches, $R_G(S')$ is used to check whether a vertex is blocked in a sample.
 
@@ -450,12 +468,12 @@ Even though \acro's behavior is not chaotic with respect to changes in parameter
         \EndFor
     \EndFor
     \State $M \leftarrow simulate(G,M,\emptyset)$
-    \State $mask \leftarrow zeros(J)$
+    \State $M_{S'} \leftarrow zeros(J)$
     \State $\varsigma \leftarrow 0$
     \For{$k=1\ldots K$}
-        \State $s \leftarrow \underset{v\in V}{\mathrm{argmax}} ~estimate(merge(mask,M_v))$
+        \State $s \leftarrow \underset{v\in V}{\mathrm{argmax}} ~estimate(merge(M_{S'},M_v))$
         \State $S \leftarrow S \cup \{s\}$
-        \State $e \leftarrow estimate(merge(mask,M_s))$
+        \State $e \leftarrow estimate(merge(M_{S'},M_s))$
         % \State $R_S \leftarrow run\_cascade(G,S,J)$
         \State {Compute seed set $S$'s Reachability set $R_{G}(S)$ }
         \State $\sigma_G(S) \leftarrow |R_{G}|/J$
@@ -463,7 +481,7 @@ Even though \acro's behavior is not chaotic with respect to changes in parameter
         \State $Err_l=|(e - \delta) / \delta|$
         \State $Err_g=|e-\delta| / \sigma $
         \If{$ Err_l < \epsilon_l \lor Err_g < \epsilon_g$} %FIXME
-            \State $mask \leftarrow merge(mask,M_s)$
+            \State $M_{S'} \leftarrow merge(M_{S'},M_s)$
         \Else
             \For{$ v\in V$} {\bf in parallel}
                 \For{$ j\in J$}
@@ -471,7 +489,7 @@ Even though \acro's behavior is not chaotic with respect to changes in parameter
                 \EndFor
             \EndFor
             \State $M \leftarrow simulate(G,M,R_S)$
-            \State $mask \leftarrow zeros(J) $ 
+            \State $M_{S'} \leftarrow zeros(J) $ 
             \State $\varsigma \leftarrow \sigma $ 
         \EndIf
     \EndFor
