@@ -73,8 +73,7 @@ pdfkeywords={Influence Maximization, Graph Processing, Graph Sampling, Fused Sam
 
 \IEEEtitleabstractindextext{%
 \begin{abstract}
-Influence maximization~(IM) is the problem of finding a seed vertex set that maximizes the expected number of vertices influenced under a given diffusion model. Due to the NP-Hardness of finding an optimal seed set, approximation methods are frequently used for IM. In addition to these high-quality, yet expensive approximation algorithms, lightweight, sketch-based approaches, which do not simulate the process exactly, have been proposed in the literature to cope with the scale of today's networks. %As expected, the quality of the seed sets for the latter is inferior to that of the former. 
-In this work, we describe a fast, error-adaptive approach that leverages Count-Distinct sketches and the recently proposed hash-based fused sampling. To estimate the number of influenced vertices throughout a diffusion, we use per-vertex Flajolet-Martin sketches where each sketch corresponds to a sampled subgraph. To efficiently simulate the diffusions, the reach-set cardinalities of a single vertex are stored in memory in a consecutive fashion. This allows the proposed algorithm to find the number of influenced vertices in a single simulation step of different simulations at once. In addition, thanks to their efficiency, and the scalability of our parallel implementation, we can rebuild the sketches whenever it is necessary. For a faster IM kernel, we rebuild the sketches only after observing estimation errors above a given threshold. Our experimental results show that the proposed method yields high-quality seed sets while being up-to $1.7\times$--$27.9\times$ faster on average than a state-of-the-art approximation algorithm. In addition, it is $3.5\times$--$11.1\times$ faster than a sketch-based approach while producing seed sets with $3\%$--$12\%$ better influence scores.
+Influence maximization~(IM) is the problem of finding a seed vertex set that maximizes the expected number of vertices influenced under a given diffusion model. Due to the NP-Hardness of finding an optimal seed set, approximation algorithms are frequently used for IM. In addition to these high-quality, yet expensive approximation algorithms, lightweight, sketch-based approaches, which do not simulate the process exactly, have been proposed in the literature to cope with the scale of today's networks. In this work, we describe a fast, error-adaptive approach that leverages Count-Distinct sketches and hash-based fused sampling. To estimate the number of influenced vertices throughout a diffusion, we use per-vertex Flajolet-Martin sketches where each sketch corresponds to a sampled subgraph. To efficiently simulate the diffusions, the reach-set cardinalities of a single vertex are stored in memory in a consecutive fashion. This allows the proposed algorithm to estimate the number of influenced vertices in a single simulation step of different simulations at once. In addition, thanks to their efficiency, and the scalability of our parallel implementation, we can rebuild the sketches whenever it is necessary. For a faster IM kernel, we rebuild the sketches only after observing estimation errors above a given threshold. Our experimental results show that the proposed method yields high-quality seed sets while being up-to $1.7\times$--$27.9\times$ faster on average than a state-of-the-art approximation algorithm. In addition, it is $3.5\times$--$11.1\times$ faster than a sketch-based approach while producing seed sets with $3\%$--$12\%$ better influence scores.
 \end{abstract}
 } 
 
@@ -103,29 +102,29 @@ In this work, we describe a fast, error-adaptive approach that leverages Count-D
 \label{sec:introduction}
 \fi
 
-The study of efficient information/influence propagation in networks becomes an important area of research with several applications in many fields, such as viral marketing~\cite{leskovec2007dynamics, trusov2009effects}, social media analysis~\cite{zeng2010social, moreno2004dynamics}, and recommendation systems~\cite{lu2012recommender}.
-As the study of these networks is imperative for educational, political, economic, and social purposes, a high-quality seed set to initiate the diffusion may have critical importance.
-Furthermore, since the diffusion analysis may be time-critical, or increasing its coverage may be expensive in terms of computing resources and time spent, novel and efficient approaches to find good vertex sets that propagate the information/influence effectively are essential.
+Efficient information/influence dissemination in a network is an important research area with several applications in various fields, such as viral marketing~\cite{leskovec2007dynamics, trusov2009effects}, social media analysis~\cite{zeng2010social, moreno2004dynamics}, and recommendation systems~\cite{lu2012recommender}.
+As the study of these networks is imperative for educational, political, economic, and social purposes, a high-quality seed set to initiate the diffusion may have vital importance.
+Furthermore, since the diffusion analysis may be time-critical, or increasing the influence coverage may be too expensive, novel and efficient approaches to find good vertex sets that propagate the information/influence effectively are essential.
 
-Influence maximization is the problem of finding a subset $S \subset V$ of $K$ vertices in a graph $G = (V, E)$ with the vertex set $V$ and edge set $E$ such that $S$ reaches the maximum reachability, i.e., influences the maximum number of vertices, under some diffusion model $M$. Kempe et al.~\cite{kempe2003maximizing} introduced the IM problem, proved it to be NP-hard, and provided a greedy Monte-Carlo approach that has a constant approximation ratio over the optimal solution. This greedy approach is one of the most frequently applied algorithms for IM. The time complexity of the greedy algorithm, estimating the $\sigma$ influence score, running $R$ simulations, and selecting $K$ seed vertices is $\mathcal{O}(KRn\sigma)$ for a graph with $n$ vertices. Although they perform well in terms of seed-set quality, the greedy Monte-Carlo solutions are impractical for real-life networks featuring millions of vertices as a consequence of their expensive simulation costs. Due to this reason, many heuristics and proxy methods have been proposed in the literature~\cite{MixGreedy, narayanam2010shapley, kimura2007extracting, chen2010PMIA,chen2010LDAG, kim2013scalable, cohen2014sketch, goyal2011simpath, jung2012irie,cheng2014imrank,liu2014influence,galhotra2016holistic}.
+Influence maximization is the problem of finding a subset $S \subset V$ of $K$ vertices in a graph $G = (V, E)$ with the vertex set $V$ and edge set $E$ such that $S$ reaches the maximum reachability, i.e., influences the maximum expected number of vertices, under some diffusion model $M$. Kempe et al.~\cite{kempe2003maximizing} introduced the IM problem, proved it to be NP-hard, and provided a greedy Monte-Carlo approach that has a constant approximation ratio over the optimal solution. This greedy approach is one of the most frequently applied algorithms for IM. The time complexity of the greedy algorithm, estimating the $\sigma$ influence score, running $R$ simulations, and selecting $K$ seed vertices is $\mathcal{O}(KRn\sigma)$ for a graph with $n$ vertices. Although they perform well in terms of seed-set quality, the greedy Monte-Carlo solutions are impractical for real-life networks featuring millions of vertices as a consequence of their expensive simulation costs. Due to this reason, many heuristics and proxy methods have been proposed in the literature~\cite{MixGreedy, narayanam2010shapley, kimura2007extracting, chen2010PMIA,chen2010LDAG, kim2013scalable, cohen2014sketch, goyal2011simpath, jung2012irie,cheng2014imrank,liu2014influence,galhotra2016holistic}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
 % However, these simulation-based, greedy algorithms provide the best possible approximation guarantees. Therefore they are considered as the gold standard for IM.  
 
-Simulating a greedy algorithm in parallel is a straightforward workaround to reduce the execution time of IM kernels and make them scalable for large-scale networks. However, for large networks, a greedy approach with a good approximation guarantee does not come cheap even if a large number of processing units/cores are available on networks with billions of vertices and edges. Following similar attempts in the literature, we propose a parallel, sketch-based greedy approach that approximates the Monte-Carlo processes. The proposed approach does not exactly count the number of influenced vertices. Instead, it leverages Count-Distinct sketches. Below is a summary of our contributions:
+Simulating a greedy algorithm in parallel is a straightforward workaround to reduce the execution time of IM kernels and make them scalable for large-scale networks. However, for large networks, a greedy approach with a good approximation guarantee does not come cheap on networks with billions of vertices and edges even if a large number of processing units/cores are available. Following similar attempts in the literature, we propose a parallel, sketch-based greedy approach that approximates the Monte-Carlo processes. To further increase the performance, the proposed approach does not exactly count the number of influenced vertices. Instead, it leverages Count-Distinct sketches. Below is a summary of our contributions:
 
 \begin{itemize}
 \item We propose \acro\footnote{\url{https://github.com/ggokturk/infuser}}, an open-source, blazing-fast, sketch-based and accurate Influence Maximization algorithm. The proposed scheme samples the edges as they are traversed across several simulations. Thus, sampling, diffusion, and count-distinct processes are fused for all simulations. 
 
-\item Running concurrent simulations on per-vertex Count-Distinct sketches reduces the number of memory accesses. While traversing an edge, any number of diffusion simulations can be performed between vertices, using only a single (8-bit) value per vertex for each simulation. 
-
-\acro processes all samples of a single edge together. The suggested approach, therefore, decreases the pressure on the memory management unit. On the cascade models, \acro employs vector compute units to its near maximum efficiency to regularize memory accesses.
+\item Running concurrent simulations on per-vertex Count-Distinct sketches reduces the number of memory accesses which is the main bottleneck for many graph kernels in the literature. While traversing an edge, any number of diffusion simulations can be simultaneously performed over the graph, using only a single (8-bit) value per vertex for each simulation. 
 
 \item \acro{} can process very large graphs with millions of vertices and hundreds of millions of edges under a minute, without compromising the quality of results. For large graphs, due to its race condition indifferent nature, the performance scales near linearly with the number of threads available. Furthermore, while processing the graph, only a few GBs of memory is used, mostly for storing the graph itself. 
 
-\item We evaluate the performance, memory consumption, and influence score with sketch- and approximation-based state-of-the-art influence maximization algorithms, namely {\sc Skim}~\cite{cohen2014sketch}, {\sc Tim+}~\cite{tim} and {\sc Imm}~\cite{minutoli2019fast}, to accurately position the performance of \acro{} in the IM literature. The experiments show that \acro is $\minspeedup\times$—$\maxspeedup\times$ faster than state-of-the-art sketch-based algorithms while having almost the same quality with the approximation-based algorithms in terms of scores, and using a comparable amount of memory.
+\item Once it is read from the memory, \acro processes all samples of a single edge together. The suggested approach, therefore, decreases the pressure on the memory subsystem. Furthermore, it employs vector compute units to its near maximum efficiency to regularize memory accesses.
+
+\item We evaluate the performance, memory consumption, and influence score with sketch- and approximation-based state-of-the-art influence maximization algorithms, namely {\sc Skim}~\cite{cohen2014sketch}, {\sc Tim+}~\cite{tim} and {\sc Imm}~\cite{minutoli2019fast}, to accurately position the performance of \acro{} within the IM literature. The experiments show that \acro is $\minspeedup\times$—$\maxspeedup\times$ faster than a state-of-the-art sketch-based algorithm while having almost the same quality with the approximation-based algorithms in terms of influence, and using a comparable amount of memory.
 
 \end{itemize}
 
@@ -133,21 +132,13 @@ The paper is organized as follows:
 In Section~\ref{sec:background}, we present 
 the background on IM and introduce the mathematical notation. 
 Section~\ref{sec:method} describes the proposed approach in detail.
-In Section~\ref{sec:evaluation}, a thorough performance comparison over the traditional algorithms is provided by conducting experiments on various real-world datasets and influence settings. A detailed comparison with the state-of-the-art from the literature is also given.
-Section~\ref{sec:relatedwork} presents a comparative overview of the existing work. Finally, Section~\ref{sec:conclusion} discusses future work and concludes the paper.
-
-
-
-
-
+In Section~\ref{sec:evaluation}, a thorough performance evaluation is provided by conducting experiments on various real-world datasets and influence settings. A detailed empirical comparison with the state-of-the-art from the literature is also given. Section~\ref{sec:relatedwork} presents a comparative overview of the existing work. Finally, Section~\ref{sec:conclusion} discusses future work and concludes the paper.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Notation and Background}\label{sec:background}
 
-Let $G = (V,E)$ be a directed graph where the $n$ vertices in $V$ represent the agents, and $m$ edges in $E$ represent the relations between the agents in $V$.
-The neighborhood of a vertex $u \in V$ is denoted as $\Gamma_{G}(v) = \{v: (u,v) \in E\}$. 
-A graph $G' = (V',E')$ is a sub-graph of $G$ if $V' \subseteq V$ and $E' \subseteq E$. The diffusion probability on the edge $(u, v) \in G$ is noted as $w_{u,v}$, where $w_{u,v}$ can be determined either by the diffusion model or according to the strength of $u$ and $v$'s relationship in the data.
+Let $G = (V,E)$ be a directed graph where the $n$ vertices in $V$ represent the agents, and $m$ edges in $E$ represent the relations among them. An edge $(u,v) \in E$ is an {\em incoming} edge for $v$ and an {\em outgoing} edge of $u$. The {\em incoming} neighborhood of a vertex $v \in V$ is denoted as $\Gamma_{G}(v) = \{u: (u,v) \in E\}$. A graph $G' = (V',E')$ is a sub-graph of $G$ if $V' \subseteq V$ and $E' \subseteq E$. The diffusion probability on the edge $(u, v) \in G$ is noted as $w_{u,v}$, where $w_{u,v}$ can be determined either by the diffusion model or according to the strength of $u$ and $v$'s relationship in the data.
 
 \begin{table}[!ht]
     \caption{Table of notations}
@@ -157,8 +148,10 @@ A graph $G' = (V',E')$ is a sub-graph of $G$ if $V' \subseteq V$ and $E' \subset
         \hline
         Variable & Definition  \\
         \hline
+        \kktodo{uzerinden 
+        gecelim}\\
         $G = (V,E)$     & Graph $G$ with vertices $V$ and edges $E$ \\
-        $\Gamma_G(v)$   & Neighborhood of incoming edges to vertex $v$ in graph $G$\\ %%FIXME
+        $\Gamma_G(u)$   & Neighborhood of $u$ in graph $G$, the endpoints of its outgoing edges\\ %%FIXME
         $w_{u,v}$       & Probability of $u$ directly influencing $v$ \\
         %$SCC(v) $       & Strongly connected component of vertex $v$\\
         $R_{G}(v)$      & Reachability set of vertex $v$ on graph $G$\\
@@ -193,7 +186,9 @@ A graph $G' = (V',E')$ is a sub-graph of $G$ if $V' \subseteq V$ and $E' \subset
 \end{table}
 \subsection{Influence Maximization}
 
-Influence Maximization aims to find a seed set $S \subseteq V$ among all possible size $K$ subsets of $V$ that maximizes an {\em influence spread function} $\sigma$  when the diffusion process is initiated from $S$. Although we focus on graphs with bidirectional edges, for IM, the edges can be unidirectional depending on the initial construction. That is although the edges $\{u, v\} \in E$ are assumed to be bidirectional, throughout the diffusion process, we use $(u, v)$~($(v, u)$) as the edge that may be used to influence/activate $v$~($u$) given that $u$~($v$) has already been influenced/activated. This being said, $w_{u,v}$ can be set to zero to make the edge $(v, u)$ practically unidirectional.
+Influence Maximization aims to find a seed set $S \subseteq V$ among all possible size $K$ subsets of $V$ that maximizes an {\em influence spread function} $\sigma$  when the diffusion process is initiated from $S$. %Although we focus on graphs with bidirectional edges, for IM, the edges can be unidirectional depending on the initial construction. That is although the edges $\{u, v\} \in E$ are assumed to be bidirectional, throughout the diffusion process, we use $(u, v)$~($(v, u)$) as the edge that may be used to influence/activate $v$~($u$) given that $u$~($v$) has already been influenced/activated. This being said, $w_{u,v}$ can be set to zero to make the edge $(v, u)$ practically unidirectional. 
+In the literature, {\em independent} and {\em weighted cascade}~(IC and WC), and 
+{\em linear threshold}~(LT)~\cite{kempe2003maximizing} are three widely recognized diffusion models for IM. 
 
 \begin{figure}[!ht] 
     \centering
@@ -203,113 +198,78 @@ Influence Maximization aims to find a seed set $S \subseteq V$ among all possibl
         \includegraphics[width=0.37\linewidth]{images/wc.pdf}}
     \\% IMAGES HERE
   \caption{\protect\subref{fig:ic} 
-The directed graph $G = (V, E)$ for Independent Cascade with independent diffusion probabilities. 
+\kktodo{a parti nonuniform weight olsun} The directed graph $G = (V, E)$ for Independent Cascade with independent diffusion probabilities. 
 \protect\subref{fig:wc}
-The directed graph was obtained from the directed one by setting the diffusion probabilities of incoming edges to $1 / |\Gamma_G(v)|$ for each vertex $v \in V$. 
+The directed graph for WC is obtained by setting the diffusion probabilities of incoming edges to $1 / |\Gamma_G(v)|$ for each vertex $v \in V$. \kktodo{bu (4,1) kenarinin agirligi 1 degil mi?} 
   }
   %\label{fig_ic_model} 
   \label{fig:xx} 
 \end{figure}
-In the literature, {\em independent} and {\em weighted cascade}~(IC and WC), and 
-{\em linear threshold}~(LT)~\cite{kempe2003maximizing} are three widely recognized diffusion models for IM. 
 
 \begin{itemize}[leftmargin=*]
-\item An {\bf Independent Cascade} process performs in iterations and activates a vertex $v$  if one of $v$'s (incoming) edges $(u, v)$ is 
-used during the diffusion iteration, which happens with the activation probability $w_{u, v}$, given that $u$ has already been influenced in the previous rounds. The activation probabilities are independent (from each other and previous activations) in the {\em independent cascade} model which we concentrate on in this paper, as in Figure~\ref{fig:ic}.
+\item The {\bf Independent Cascade} model works in rounds and activates a vertex $v$ in the current round if one of $v$'s incoming edges $(u, v)$ is 
+used during the diffusion round, which happens with the activation probability $w_{u, v}$, given that $u$ has already been influenced in the previous rounds. The activation probabilities are independent (from each other and previous activations) in the {\em independent cascade} model which we concentrate on this paper. A toy graph with activation probabilities on the edges is shown in Figure~\ref{fig:ic}.
 In theory, there can exist parallel and independent $\{u, v\}$ edges in $E$. In practice, they are merged to a single $\{u,v\}$ edge via preprocessing. 
 
 \item The {\bf Weighted Cascade}  model is a variant of the independent cascade that uses the structural properties of vertices to set the edge weights as shown in Figure~\ref{fig:wc}.
-The method, as described in~\cite{MixGreedy}, sets $w_{u, v} = 1 / d_v$ where $d_v$ is the number 
+The method, as described in~\cite{kempe2003maximizing}, sets $w_{u, v} = 1 / d_v$ where $d_v$ is the number 
 of incoming edges of $v$~(which in the original graph is equal to $\Gamma _G(v)$).
 Therefore, if $v$ has $\ell$ neighbors activated in the last round, its probability of activation in the new round is $1-( 1-1 / d_v)^\ell$. 
+\kktodo{bu tanim [7]'dekine uymuyor. Orada undirected graph var } Note that the model is originally defined for undirected graphs in~\cite{MixGreedy}. However, the definition above is consistent since one can consider each~(undirected) edge as two directed edges. 
 
 %$ {|E^G_{u,v}|}/{|E^G_{u}|}$ where $|E^G_{u,v}|$ is the number of parallel $\{u, v\}$ edges and $|E^G_{u}|$ is the number of $\{u, .\}$ edges, i.e., all of $u$'s edges in the undirected graph.
 
-\item{\bf Linear threshold} generalizes the independent cascade model and activates the $v$ vertex once the cumulative activation coming from the neighbors of $v$ exceeds the $\theta v$ threshold. 
-All $\{u, v\}$~(or $(u, v)$ in the directed graph) edges with active $u$ vertices are taken into account in the process. Vertex $v$ is activated when the total activation probability through these edges exceeds $\theta_v$~\cite{kempe2003maximizing}.  
+\item{\bf Linear threshold} generalizes the independent cascade model and activates the vertex $v$ once the cumulative activation coming from its neighbors exceeds a given threshold $\theta_v$. 
+All the $(u, v)$ edges with active $u$ vertices are taken into account in the process. Vertex $v$ is activated when the total activation probability through these edges exceeds $\theta_v$~\cite{kempe2003maximizing}.  
 Therefore, the independent cascade model is a special variant of the linear threshold model with $\theta_v = 0$. 
 \end{itemize}
 
-As a generalization of these models, {\bf triggering} has been proposed by Kempe~et~al.~\cite{kempe2003maximizing} to generalize the previous models mentioned above. In this model, each neighbor has a probability to influence the vertex $v$. The diffusion process chooses a random subset of vertices called the {\em triggering set} to activate the vertices at each instance.
+%As a generalization of the above-mentioned models, {\bf triggering} has also been proposed by Kempe~et~al.~\cite{kempe2003maximizing}. In this model, each neighbor has a probability to influence the vertex $v$. The diffusion process chooses a random subset of vertices called the {\em triggering set} to activate the vertices at each instance.
+The complexity analysis stays consistent for many diffusion models, including {\em Independent Cascade}~(IC), {\em Weighted Cascade}~(WC), and {\em Linear Threshold}~(LT)  models; the time complexity of the greedy algorithm, estimating the $\sigma$ influence score, running $R$ simulations, and selecting $K$ seed vertices is $\mathcal{O}(KRn\sigma)$ for a graph with $n$ vertices. \kktodo{bu son cumle dogru mu}\ggx{Aklima tersini dogrulayacak bir ornek gelmiyor hocam. Dogru olmali.} We concentrate on the IC model in this paper, but the proposed methods are also relevant to other models in the literature.
 
-The complexity analysis stays consistent for many diffusion models, including {\em Independent Cascade}~(IC), {\em Weighted Cascade}~(WC), and {\em Linear Threshold}~(LT)  models. We concentrate on the independent cascade model in this paper, but the proposed methods are also relevant to other models in the literature.
+\subsection{Count-Distinct Sketches}\label{sec:sketch}
+The {\em distinct element count} problem focuses on finding the number of distinct elements in a stream where the elements are coming from a universal set ${\cal U}$. Finding the number of vertices to be influenced of a candidate seed vertex, i.e., the cardinality of the {\em reachability set}, is a similar problem. For each sample subgraph, the number of visited vertices is calculated while traversing the subgraphs starting from the candidate vertex. Note that an exact computation of set cardinality requires memory proportional to the cardinality which is ${\mathcal O}(|{\cal U}|)$. 
 
-\subsection{Count-Distinct Sketch}\label{sec:sketch}
-The {\em distinct element count} problem focuses on finding the number of distinct elements in a stream with non-distinct elements. Computing the reachability sets of a vertex is a similar problem; the cardinality of all vertices visited is calculated while traversing sample subgraphs from the given vertex. Exact cardinality calculations require memory proportional to the cardinality. 
-
-The reachability set of a vertex is a distinct union of all connected vertices' reachability sets. Many other Influence Maximization methods exploit this property to some degree. 
-
-The methods based on Reverse Reachability and Bottom-Up Traversal utilize this property directly to merge the reachability sets of connected vertices to estimate vertices influence.
-MixGreedy method goes one step further; it utilizes that all vertices in a connected component that have the same reachability set in undirected graphs. Therefore, for a sample graph, all reachability sets can be found in a single graph traversal. 
+The reachability set of a vertex is the union of those of all its connected vertices (via outgoing edges). Many IM kernels exploit this property to some degree. The methods based on {\em reverse reachability} \kktodo{cite} and {\em bottom-up traversal} \kktodo{cite} utilize this property directly to merge the reachability sets of connected vertices to estimate the number of vertices influenced. {\em MixGreedy} \kktodo{cite} goes one step further; it utilizes the fact that for an undirected graph, all vertices in a connected component have the same reachability set. Therefore, all the reachability sets within a single sample subgraph can be found via a single graph traversal. 
 
 For directed graphs, storing reachability sets for all vertices and merging these sets are infeasible for nontrivial graphs. 
-If one-hot vectors are used to store reachability sets for constant insertion time, $O(n^2\mathcal{R})$ bits of memory is required and each merge operation has $O(n)$ time complexity. 
-if Disjoints sets are used for storing reachability sets; $(n\bar{\sigma}\mathcal{R})$ memory is required to store all reachability sets, and each merge operation has $O(Ackermann'(\sigma))$ complexity.
+If one-hot vectors are used to store the reachability sets for constant insertion time $\mathcal{O}(n^2\mathcal{R})$ bits of memory is required where each merge operation has $\mathcal{O}(n)$ time complexity. 
+If disjoints sets are used for storing reachability sets; $\mathcal{O}(n\bar{\sigma}\mathcal{R})$ \kktodo{Gokhan bunu aciklayalim, bir de $\bar{\sigma}$ nedir}\ggx{estimated influence} memory is required to store all reachability sets, and each merge operation has $\mathcal{O}({\tt Ack}(\sigma))$ complexity where ${\tt Ack}$ is the Ackermann function \kktodo{bu Ackermann'a atif verelim}.
 
-Count-distinct sketches have nice properties for such problems; Flajolet–Martin algorithm\cite{flajolet1985probabilistic} can estimate the cardinality of distinct elements in reachability sets with a constant number of registers($J$), and most important, union operation on these sets can be done in a constant number of operations.
+Count-Distinct Sketches can be leveraged to efficiently estimate the cardinality of reachability sets; for instance, the Flajolet–Martin~(FM) sketch~\cite{flajolet1985probabilistic} can do this with a constant number, $J$, of registers. Furthermore, the union of two sketches can be computed in constant time. The FM sketch simply stores that how rare the elements are in a stream. The rarity of the elements is estimated by counting the maximum number of leading zeros in the hash values of the stream elements. Initially, each register is initialized with zero. The items are hashed one by one and the length of the longest all-zero prefix is stored in the register. With a single register, the cardinality estimation can be done by computing the power $2^\ell$ where $\ell$ is the value in the register.
 
-
-Flajolet–Martin algorithm only stores how rare elements are in a multiset. The rarity of the elements is often computed by counting the leading zeros in the item's hash value.  The registers are initialized with zero values in the beginning. Items are added by storing the longest leading zero count. Cardinality estimation can be done by taking 2 to the power of the stored value. Multiple registers and hash functions, $M[j]$ and $h_j$, are commonly used to reduce variance.
-Adding the item $x$ to sketch $M$, and its result $M'$ is shown in equation~\ref{eq:sketch-add}.
-
+In practice, multiple registers and hash values, $M[j]$ and $h_j$, are commonly used to reduce variance. For a sketch with multiple registers, the impact of adding an item $x \in \cal{U}$ is shown in~\eqref{eq:sketch-add}:
 \begin{equation}
     \label{eq:sketch-add}
-    M'[j] = max(M[j],clz(h_j(x)) ~ \forall j\in(0,J]
-\end{equation} where $clz$ is count leading zeros function and $J$ is the number of sketch registers.
-
-The merge operation for two sketches, $M_u$,$M_v$, can be performed by computing the pairwise maximum of the registers. Formally; 
-\begin{equation}
-    \label{eq:sketch-merge}
-    M'[j] = max(M_u[j],M_v[j]) ~ \forall j\in(0,J]
-\end{equation} 
-where $M'$ is union of set and $J$ is the number of sketch registers.
-
-Average of the longest running zeros can be used compute the cardinality and the result is divided to the correction factor $\phi \approx 0.77351$ to correct hash collisions.
+    M[j] = \max(M[j], clz(h_j(x)),~1 \leq j \leq J
+\end{equation} where $clz(y)$ returns the number of leading zeros in $y$ and $J$ is the number of sketch registers. With multiple registers, the average of the register values can be used to estimate the cardinality, and the result is divided to a correction factor $\phi \approx 0.77351$ to fix the error due to hash collisions. That is the estimated cardinality $e$ is computed as
 \begin{equation}
     \label{eq:sketch-estimate}
     e = 2^{\bar{M}}/\phi
 \end{equation} 
-where $e$ distinct cardinality and $\bar{M}$ is the mean of the registers.
+where $\bar{M} = {\tt{avg}}_j\{M[j]\}$ is the mean of the register values.
 
-In this work, we utilize a variant of Flajolet–Martin sketch; since multiple Monte-Carlo simulations are performed to calculate the estimated influence, we use one register per simulation and take the average of longest leading zero counts to calculate the average cardinality of reachability sets. Merge operations are performed if and only if there is an edge between the respective simulations. 
+In this work, we utilize a variant of Flajolet–Martin sketch; since multiple Monte-Carlo simulations are performed to calculate the estimated influence, we use one register per simulation and take the average length of the longest leading zeros. Two given FM sketches $M_u$ and $M_v$ can be merged, i.e., their union $M_{uv}$ can be computed, by taking the pairwise maximums of their registers. Formally; 
+\begin{equation}
+\label{eq:sketch-merge}
+    M_{uv}[j] = \max(M_u[j], M_v[j]),~1 \leq j \leq J.
+\end{equation} 
+In our implementation, the merge operations are performed if and only if there is an edge between the vertices in respective samples \kktodo{burada simulations yaziyordu, anlamadim, iki simulation arasinda nasil edge olur - o yuzden vertex yazdim}. \ggx{ j'th sampleda vertexler arasında sampled edge olmasını kastetmiştim. Yanlis olmus.}  
 
 \section{Error-Adaptive Influence Maximization}\label{sec:method}
 
-% \kktodo{burada bir giris gerekiyor - basit, 4-5 adimli bir algoritma, bir iki paragraf anlatim ne yapiyoruz, niye yapiyoruz} % gg:Anlatim ile aciklamayi birlestirdim.
-Most influence maximization methods have the same few steps to compute the seed set including; Sampling, building influence oracle, verifying candidates, then removing the residual reachability set of the latent seed set. \acro, on the other hand, fuses sampling step to other steps to accumulate memory accesses.
+Most IM algorithms have the same few steps to find the best seed vertex set; sampling, building the influence oracle, verifying the impact of new candidates, then removing the residual reachability set of the latent seed set. Following the idea proposed in~\cite{infuser}, \acro fuses the sampling step with other steps to avoid reading the graph multiple times. 
 
-\acro first performs a diffusion process; The process starts with per-vertex sketches that are initialized with their own vertices. 
-Then, for all edges sketch of the source vertex is merged with the target vertex until all registers converge. 
-The merge operation utilized in the process is slightly different from the conventional use and retrofitted to mimic the independent cascade diffusion model. 
-Registers of a sketch are assigned to a single sample/simulation; Merge operations are performed on the register only if both vertices are $live$ in the sample associated with the register. 
-This process relays reachability information between vertices. 
-At each iteration, all reachable vertices in a single step are added to the sketches. 
-Instead of performing diffusion for a single vertex/path/, all influence that passes through an edge in a single step is processed. 
-This dynamic programming like property allows us to estimate marginal influence for all vertices very fast. 
-After, \acro picks the vertex with the largest estimated reachability set by looking at sketches alone. 
-After, \acro calculates reachability sets of the latent seed set by performing Monte-Carlo simulations. 
-The Vertices in the reachability sets are labeled blocked in respective samples. 
-Finally, \acro computes whether to rebuild the sketches using the error between sketch estimate and Monte-Carlo estimate.  
+\acro first performs a diffusion process; the process starts with per-vertex sketches that are initialized with the hash value of the corresponding vertex~(i.e., every vertex reaches to itself). Then, for all the (sampled) edges ($u, v$), i.e., the ones that contribute to the diffusion for this simulation, the sketch of the source vertex $u$ is merged into that of the target vertex $v$ until all sketch registers for all the vertices converge. The merge operation utilized in this process is slightly different than the conventional one and retrofitted to mimic the IC diffusion. 
 
-
-
+Throughout the process, each register is used only for a single sample/simulation. A merge operation for an edge ($u, v$) of the graph is performed on $v$'s register if and only if the edge exists in the sample and \kktodo{bunu da degistirdim} $u$ is {\em live} in the current iteration. This process iteratively relays the reachability information among the vertices. At each iteration, the sketches of the current reachable vertices are modified. \kktodo{onceki cumleyi de degistirdim - dogru mu} 
+Instead of simulating the diffusion sample-by-sample, vertex-by-vertex, and/or path-by-path, all the influence that passes through the edges in a single step is processed together. 
+This recursive formulation of the influence allows us to estimate the marginal influence for all vertices very fast. 
+After the computation of reachability set cardinalities, \acro picks the vertex $v$ with the largest cardinality by evaluating the sketches. Then \acro calculates the reachability set of the latent seed set, i.e., the one that contains the current set and $v$, by performing Monte-Carlo simulations. The vertices in the reachability sets are labeled {\em blocked} \kktodo{niye blocked, influenced desek?}\ggx{literaturde kullanilan terim o sekildeydi} in the respective samples. Finally, the algorithm checks if a rebuilding is necessary for the sketches based on the difference between the sketch estimate and Monte-Carlo estimate. \kktodo{yukaridaki cumlelerde bunlara isim verelim, burada soyleyelim matematiksel olarak - zaten isimleri var sanirim}. 
 
 \subsection{Hash-based Fused Sampling}
-The probabilistic nature of cascade models requires sampling subgraphs $\hat{G}$ from $G = (V, E)$ to simulate the diffusion process. The sampling part of the algorithm can be a dominating factor in processing; sampling may demand multiple passes on the graph, if samples are memoized, multiple times of the graph size needs to be stored.
-In this work, we borrow hash-based fused sampling from {\sc InFuseR}\cite{infuser}. By using a hash-based fused sampling, we eliminate the necessity of in-memory creation and storage of the sample subgraphs.
-While processing an edge, it is considered for all possible samples.
-It is sampled or skipped depending on the outcome of the hash-based random value. The hash function used is given in equation \ref{eq:hash}.
-\begin{equation}
-    \label{eq:hash}
-    h(u,v) = \mbox{{\sc Murmur3}}(u||v)~mod~2^{31}  
-\end{equation}
-where $||$ is the concatenation operator. 
-
-We have tried a few other hash algorithms as well; Ideally, we chose {{\sc Murmur3}} due to its simplicity and good avalanche behavior with maximum bias $0.5 \% $\cite{MurmurHash3Performance}.
-
-For performance considerations, edge hash values were precomputed in our work and only existing pairs were considered. The trade-off between extra memory and computation here maybe not be applicable for different computation architectures and faster/simpler hash functions.
-
-Although the above-mentioned approach generates a unique hash value for each edge, and hence a unique sampling probability, different simulations require different probabilities.
+The probabilistic nature of cascade models requires sampling subgraphs from $G = (V, E)$ to simulate the diffusion process. If performed individually as a preprocessing step, as the literature traditionally does, the sampling stage can be an expensive, furthermore, a time-wise dominating one for the overall IM kernel; first, sampling multiple sub-graphs may demand multiple passes on the graph, which can be very large, and second, if samples are memoized, the memory requirement can be a multiple of the graph size. 
+In this work, we borrow the fused sampling technique from {\sc InFuseR}~\cite{infuser} which eliminates the necessity of in-memory creation and storage of the sample subgraphs.\kktodo{burata alttaki figure atfen basitce ne oldugunu anlatan 2-3 cumle gerek}
 
 \begin{figure}[!ht] 
     \centering
@@ -328,82 +288,125 @@ Although the above-mentioned approach generates a unique hash value for each edg
   \label{fig:traversal} 
 \end{figure}
 
-
-Multiple deterministic random values for each edge are generated by using the edge hash values and random numbers $X_r$ associated with each simulation $r$. 
-Sampling probability of $(u, v)$ for simulation $r$, $P(u, v)_r$, is computed as follows; First, $h(u,v)$ is XOR'ed with a uniformly randomly chosen $X_r \in_R [0, h_{max}]$ and the result is normalized by dividing the value to the upper limit of the hash value $h_{max}$. Formally,
+In \acro, when an edge of the original graph is being processed, i.e., when it is read from the memory, it is processed for all possible samples. That is for each sample, it is decided to be {\it sampled} or {\it skipped} depending on the outcome of the hash-based random value. Given a graph $G = (V, E)$, for an edge $(u, v) \in E$, the hash function used is given below:
+\begin{equation}
+    \label{eq:hash}
+    h(u,v) = \mbox{{\sc Murmur3}}(u||v)~mod~2^{31}  
+\end{equation}
+where $||$ is the concatenation operator. In our preliminary experiments, we have tried a set of hash algorithms. After a careful analysis, we chose {{\sc Murmur3}} due to its simplicity and good avalanche behavior with a maximum bias $0.5\%$~\cite{MurmurHash3Performance}. Although the above-mentioned approach generates a unique hash value for each edge, and hence a unique sampling probability, different simulations require different probabilities. To enable this for each edge, first a set of uniformly randomly chosen numbers $X_r \in_R [0, h_{max}]$ associated with each simulation $r$ are generated. Then the sampling probability of $(u, v)$ for simulation $r$, $P(u, v)_r$, is computed: To do this, the hash value, $h(u,v)$, is XOR'ed with  $X_r$ and the result is normalized by dividing the value to the upper limit of the hash value $h_{max}$. Formally,
 \begin{equation}
     \label{eq:hash_prob}
     P(u,v)_r = \frac{X_r \oplus h(u,v)}{h_{max}}.
 \end{equation}
-
 % The edge $\{u,v\}$ is verified to be in the sample if ${\rho}(u,v)_r$ is smaller than or equal to the threshold $w_{u,v}$. 
-The edge $\{u,v\}$ is exists in the sample $r$ if and only if  ${P}(u,v)_r$ is smaller than the edge threshold $w_{u,v}$. One of the benefits of this approach is that an edge can be sampled using a single XOR and compare-greater-than operation. Moreover, the following control flow branch can be removed using conditional move operations. 
-An efficient implementation of this approach will be discussed later in this section.
+The edge $(u,v)$ exists in the sample $r$ if and only if  ${P}(u,v)_r$ is smaller than the edge threshold $w_{u,v}$. One of the benefits of this approach is that an edge can be sampled using a single XOR and compare-greater-than operation. Moreover, the corresponding control flow branch overhead can be removed using {\em conditional move} instructions. 
+
+
+
 \begin{figure}[!ht] 
     \centering
     \includegraphics[width=1\linewidth]{./images/CDF.pdf}
     \caption{Cumulative probability function of hash-based sampling probabilities on various real-life networks.}
     \label{fig:prob-cdf} 
 \end{figure}
-Using a strong hash function such as {{\sc Murmur3}} ensures that all bits independently change if the input is changed. This property allows us to generate good enough pseudo-random values for fair sampling. To prove the fairness of random values generated with the hash-based approach, we generated a large number of samples for various real-life networks and graphed the bias of random values $P(u,v)_r$ used while sampling.
+
+
+Using a strong hash function such as {{\sc Murmur3}} ensures that all bits independently change if the input is changed. This property allows us to generate good enough pseudo-random values for fair sampling. To evaluate the randomness and fairness of the values generated with the hash-based approach, we generated a large number of samples for various real-life networks and graphed (1) the cumulative distribution~(Fig.~\ref{fig:prob-cdf}) and (2) the bias of the random values $P(u,v)_r$ used~(Fig.~\ref{fig:prob-bias}). As the former figure shows, the sampling probability distribution of the values generated by hash-based computation resembles that of the uniform random distribution. Furthermore, the latter figure shows that the bias is small for each network. 
+
+\begin{figure}[!ht] 
+    \centering
+    \includegraphics[width=1\linewidth]{./images/bias.pdf}
+    \caption{Bias distribution of hash-based sampling probabilities on various real-life networks. \kktodo{bias matematiksel olarak nasil hesaplanir. bunu buraya yazalim}}
+    \label{fig:prob-bias} 
+\end{figure}
 
 % For a given graph $G = (V,E)$, the bias of a sampling probability $x$ is computed as $|(31/2) − E(|H(m)|) / E(|H(m)|))|$ for all $(u,v) \in E$ and $0 \leq r < R$. 
 % Figure~\ref{fig:prob-bias} shows the bias for 12 real-life networks. 
-The sampling probability distribution of hash-based computation is almost identical to the uniform distribution with small bias.
-
-
-% \begin{figure}[!ht] 
-%     \centering
-%     \includegraphics[width=1\linewidth]{./images/bias.pdf}
-%     \caption{Bias distribution of hash-based sampling probabilities on various real-life networks.}
-%     \label{fig:prob-bias} 
-% \end{figure}
-
 %Traditional implementations sample each edge in $G$ once per simulation and store them to construct a sampled subgraph. n
-Being able to generate infinitely many samples on-the-fly allows us to avoid many memory accesses. The only downside of hash-based fused sampling is that we have to generate all random values,   $P(u,v)_r$, for each edge traversal.  Fortunately, these computations are quite fast on modern computing hardware.
+Being able to generate the samples on-the-fly allows us to avoid many memory accesses. The only downside of hash-based fused sampling is that we have to generate all these random values,   $P(u,v)_r$, for each edge traversal and each simulation $r$. To reduce this cost and leverage the performance gains of fused sampling better, the edges' hash values are precomputed for all the edges in $E$. Fortunately, the rest of the operations, i.e., one XOR and one division, are quite fast on modern computing hardware. %The trade-off between extra memory and computation here maybe not be applicable for different computation architectures and faster/simpler hash functions.
 
-\subsection{Reachability Set Cardinality Estimation}
-A greedy solution to the influence maximization problem requires finding a vertex that maximizes the marginal influence gain at each step until the seed set size reaches $K$. And, single vertex influence estimation is the same problem as the count-distinct problem applied to all sample subgraphs. So, it is possible to use Count-distinct sketches to estimate influence scores in the greedy method. 
-
-We propose an influence maximization method that utilizes the Count-distinct sketch we mentioned in section \ref{sec:sketch} to estimate the averages of distinct elements in sample subgraphs for both time and space efficiency. Algorithm \ref{algo:main} describes the method proposed as follows; 
-
-First, the reachability sets of all vertices are initialized with the vertices themselves. For all vertices $u$, its $j$th register is set to $M_u[j]=clz(h_j(u))$ meaning $R_{\hat{G}_j}(u) = \{u\}$. Then, we perform the diffusion process on the sketch registers. 
-
-Second, the diffusion process is performed between vertex sketches. All vertices added to live vertices set $L$. Then, the incoming edges $(u,v)$ for all live vertices are processed. For all simulations where $u$ is live, the sketches of both sides are merged and set to $u$ registers. If any of the sketch registers change, the vertex $u$ is added to the next iteration's live vertices set $L'$. After the live edges are processed, if the next iteration's live vertices set is smaller than the convergence threshold $\epsilon_c$, the diffusion process concluded. If not, we swap $L$ and $L'$, clear $L'$, and then the diffusion processed is repeated. 
-
-In Greedy algorithm\cite{kempe2003maximizing} for each candidate vertex, influence diffusion computations are performed for each vertex.  On the other hand, diffusion on sketch registers allows finding all vertices reachability set. All vertices influence scores in a single-step distance only computed once. This dynamic programming like property allows fast selection of influence maximizing candidates. Only iterations as much as the diameter of sample graphs are required to converge the sketches. 
+\subsection{Estimating Reachability Set Cardinality}
+A greedy solution to the influence maximization problem requires finding a vertex that maximizes the marginal influence gain at each step until the seed set size reaches $K$. For an exact computation, one must find the reachability sets of all candidate vertices within all the samples. Such a task involves many graph traversals and is expensive even with various algorithmic optimizations and a scalable parallelized implementation, e.g., see~\cite{infuser}. As explained above, the influence estimation problem is quite similar to the Count-Distinct problem applied to all sample subgraphs. Hence, in this work, we pursue the idea of using Count-Distinct sketches to estimate marginal influence scores. In this work, we propose an effective and efficient IM kernel, \acro, that utilizes Flajolet–Martin sketches described in Section~\ref{sec:sketch} to estimate the averages of distinct elements in the sampled subgraphs. Algorithm~\ref{algo:main} shows the steps taken by the kernel.
 
 
-After diffusion, the following process is repeated until $K$ vertices are added to the seed set; For all vertex, $u$ reachability set cardinalities, $R_G(S\cup u)$, estimated by merging $M_S$ and their sketch registers. The $M_S$ used for the sketch of $R_G(S)$ and initialized with zeros. Vertex with maximum cardinality is selected to add to the seed set. Then, the actual Monte-Carlo simulations were performed to compute the reachability set of the seed set. Having an actual $R_G(S)$ allows both to calculate estimation errors and to find blocked vertices for all simulations. Blocked vertices skipped in the diffusion step in coming iterations. Besides, the real influence score allows us to know when to rebuild our sketches when the sketches have gone stale.
+\begin{algorithm}
+\caption{\sc{\acro}($G,K,J$)}
+\label{algo:main}
+\algorithmicrequire{$G = (V,E)$: the influence graph
+\\\hspace*{6.6ex}{$K$: number of seed vertices
+\\\hspace*{6.7ex}$J$: number of MC simulations}\\}
+\algorithmicensure{$S$: a seed set that maximizes influence on $G$
+}
+\begin{algorithmic}[1]
+    \State {$S \leftarrow \{\emptyset\}$}
+    \For{$ v\in V$} {\bf in parallel}
+        \For{$ j\in J$}
+            \State $M[j]_v \leftarrow clz(hash(v) \oplus hash(j))$ 
+        \EndFor
+    \EndFor
+    \State $M \leftarrow ${\sc Simulate}$(G,M,\emptyset)$
+    \State $M_{S'} \leftarrow zeros(J)$
+    \State $\varsigma \leftarrow 0$
+    \For{$k=1\ldots K$}
+        \State $s \leftarrow \underset{v\in V}{\mathrm{argmax}}\{${\sc Estimate}$(${\sc Merge}$(M_{S'},M_v))$\}\kktodo{S' nedir}
+        \State $S \leftarrow S \cup \{s\}$
+        \State $e \leftarrow ${\sc Estimate}$(${\sc Merge}$(M_{S'},M_s))$
+        % \State $R_S \leftarrow run\_cascade(G,S,J)$
+        \State {Compute seed set $S$'s Reachability set $R_{G}(S)$ \kktodo{buna da bir algoritma eklesek} }
+        \State $\sigma_G(S) \leftarrow |R_{G}|/J$
+        \State $\delta = \sigma - \varsigma$
+        \State $Err_l=|(e - \delta) / \delta|$
+        \State $Err_g=|e-\delta| / \sigma $
+        \If{$ Err_l < \epsilon_l \lor Err_g < \epsilon_g$} %FIXME
+            \State $M_{S'} \leftarrow merge(M_{S'},M_s)$
+        \Else
+            \For{$ v\in V$} {\bf in parallel}
+                \For{$ j\in J$}
+                    \State $M[j]_v \leftarrow clz(hash(v) \oplus hash(j))$ 
+                \EndFor
+            \EndFor
+            \State $M \leftarrow ${\sc Simulate}$(G,M,R_S)$
+            \State $M_{S'} \leftarrow zeros(J) $ 
+            \State $\varsigma \leftarrow \sigma $ 
+        \EndIf
+    \EndFor
+    \State \Return $S$
+\end{algorithmic}
+\end{algorithm}
 
-
+ Algorithm~\ref{algo:main} first initializes the reachability sets of all vertices by adding the vertices themselves. That is for all vertices $u$, its $j$th register is set to $M_u[j]=clz(h_j(u))$ meaning $R_{{G}_j}(u) = \{u\}$ where $G_j$ is the $j$th sampled graph. Then, we perform the diffusion process on the sketch registers. To initiate the process, all the vertices are added to the {\em live vertex set} $L$. Then the incoming edges of the live vertices are processed. If a vertex $u$ is live, its outgoing edges $(u, v)$ s.t. $v \in \Gamma_G(v)$ are processed and the sketches of $v$ are merged into those of $u$. \kktodo{burada edgeleri tersten process ettigimizi aciklamamiz gerek} If any of $u$'s sketch registers change, it is added to the live vertex set $L'$ of the next iteration. After the incoming edges of all live vertices are processed, the current iteration ends. If the cardinality of the next iteration's live vertex set, $|L'|$, is smaller than the convergence threshold $\epsilon_c$, the diffusion stops. Otherwise, $L$ is set to $L'$, and $L'$ is cleared. Then, the next iteration starts. Figure~\ref{fig:hf-processing} performs two simulations\kktodo{ bunu tamamlayalim}
+ 
 \begin{figure*}[!ht]
     \begin{center}
     \includegraphics[width=0.7\linewidth]{images/sketch-diffusion.pdf}
-    \caption{(a) The initial state on the toy graph for \acro{}; all vertices have set as live(green) and their registers initialized with leading zero count of their hashes. (b) 
+    \caption{(a) The initial state on the toy graph for \acro{}; all vertices are set as live~(green) and their registers are initialized with the length of the zero prefix of their hashes. (b) 
     % For all live edges,$e_{ij}$, respective registers are merged and set to source vertex $j$'s register, $M_j \leftarrow Max(M_i, M_j)$. 
-    For the live edge between Vertex 1 and 4, the register is set to the maximum of the respective register. Since the first register of vertex 1 has a larger value, we only update the second register. Also, the edge between vertex 4 and 3 is only live in simulation 2, so we only set the maximum of those two registers to vertex 4's second register. Notice that we are moving registers in reverse, from target to source of the edges. We set vertices 1 and 4 as live(green) since their registers have changed in this iteration (c) Vertex 1's register is updated and set as live again since vertex 4's registers are changed.  (d) All vertices have registers converged. There are no live vertices. }\label{fig:hf-processing} 
+    For the live edge between Vertex 1 and 4, \kktodo{bu edge nedir - outgoing luyor?} the register is set to the maximum of the respective register. Since the first register of vertex 1 has a larger value, we only update the second register. Also, the edge between vertex 4 and 3 is only live in simulation 2, so we only set the maximum of those two registers to vertex 4's second register. Notice that we are moving registers in reverse, from target to source of the edges. We set vertices 1 and 4 as live(green) since their registers have changed in this iteration (c) Vertex 1's register is updated and set as live again since vertex 4's registers are changed.  (d) All vertices have registers converged. There are no live vertices. }\label{fig:hf-processing} 
     \end{center}
-    \end{figure*}
-\subsection{Error-Adaptive Sketch Rebuilding}
+    \end{figure*} 
+ 
+The traditional Greedy algorithm~\cite{kempe2003maximizing} processes the simulations for each candidate vertex one-by-one and computes their reachability sets. On the other hand, \acro does not compute the actual reachability sets. Instead, it efficiently simulates the diffusion on sketch registers that allow estimating the cardinality of the reachability set. This step needs to be performed {\em at most} $d$ times where $d$ is the diameter of $G$. In fact, when processed individually, the $j$th simulation over the sampled subgraph $G_j$ may require fewer steps since the diameter $G_j$ is at most $d$. However, processing all the simulations at once has significant benefits: thanks to the compactness of the sketches, the influence scores in a single-step distance can be merged by using fast vectorized instructions and for many simulations at once. Furthermore, $d$ is a loose upper bound on the number of iterations. A better upper bound for the number of \acro iterations is {\tt max}$\{d_j: 1 \leq j \leq J\}$ where $d_j$ is the diameter of the $G_j$. To reduce the overhead of concurrent simulations further and avoid bottleneck simulations, as mentioned above, we employ a convergence threshold $\epsilon_c$ over the number of live vertices which is expected to be very small when only one or two simulations remain. 
 
-Sketches are very fast approximation methods that often provide less than gold standard results. In our case, sketches are very competent at finding the first few vertices. But, after sketch registers saturate with high values, we observe a significant drop in the quality of results. Register saturation causes the naive count-distinct sketch method to not distinguish between vertices. 
+After the diffusion process, the following steps are repeated until $K$ vertices are added to the seed set $S$; First, for each $u$, the cardinality of the reachability set, $R_G(S\cup u)$, is estimated by merging $M_S$ and $u$'s sketch registers. Here $M_S$ is the set of sketch registers for $S$ used to estimate the cardinality of $R_G(S)$. Before the kernel, these registers are initialized with zeros. Second, a vertex with the maximum cardinality estimation is selected and added to $S$. Third, the actual Monte-Carlo simulations are performed to compute the reachability set of the new seed set. Having an actual $R_G(S)$ allows both to calculate estimation errors and to find blocked vertices for all simulations. These blocked vertices can be skipped during the next diffusion steps. Besides, we leverage the real influence score to have an {\em error-adaptive kernel}, i.e, to compute the real sketch error and rebuild the sketches used when the accumulated error reaches a critical level which can deteriorate the quality for the next seed vertex selections. 
+
+
+\subsubsection{Error-Adaptive Sketch Rebuilding}
+
+Sketches are fast. However, each operation, such as an update, a merge, etc., can decrease their estimation quality below a desired threshold. For influence maximization, our preliminary experiments revealed that sketches are extremely competent at finding the first few seed vertices. Unfortunately, after a few seed vertices, the sketch registers become large, lose their sensitivity, and a significant drop in the quality is observed. We observed that register saturation due to large values and  make Count-Distinct sketches incompetent while distinguishing good seed candidates. 
 
 \begin{figure}[!ht]
     \begin{center}
-    \includegraphics[width=0.7\linewidth]{images/sketch-saturation.pdf}
-    \caption{ Effect of register saturation on Amazon dataset using \acro($J=256$) without rebuilding.
+    \includegraphics[width=0.8\linewidth]{images/sketch-saturation.pdf}
+    \caption{ Effect of register saturation on Amazon dataset using \acro($J=256$) without rebuilding. \kktodo{buna TIMS'in sonuclarini da ekleyebilir miyiz - en kaliteli o diye, eger mavinin ustunde kaliyorsa guzel}
      }\label{fig:sketch-saturation} 
     \end{center}
 \end{figure}
 
-In figure \ref{fig:sketch-saturation}, we show the effect of register saturation by comparing two methods; one that uses a new sketch, that build on the residual graph after the seed sets' reachability is removed, for all iterations. Moreover, another one that builds the sketch once at the beginning, then only utilizes sketch merge operation to find the seed set. 
-Even though at first few vertices the expected influence is comparable, we observe near-linear drop-off in the estimated influence.
-    
+Figure~\ref{fig:sketch-saturation} shows the effect of register saturation by comparing two \acro variants; one that uses a new sketch to choose each candidate vertex. This sketch is built on the residual graph which remains after the overall reachability of the seed set is removed. The second variant built a  sketch once at the beginning and employs it through the IM kernel. As the figure shows, even though the seed selection quality for the first few vertices is comparable, a significant reduction on the quality is observed for later vertices.  
 
 Since building sketches with \acro is very fast, we exploit this by rebuilding sketches after observing large cardinality estimation errors.
 After adding vertices to the seed set, \acro performs Monte-Carlo simulations to estimate the reachability of the latent seed set.
-The estimation error is calculated as the following; we store influence score after each sketch rebuild on $\varsigma$ and sketch cardinality estimate of the candidate vertex on $e$. We calculate the marginal gain after the last sketch build, $\delta=\varsigma - \sigma$. Then, the local estimation error will be $Err_l=|e-\delta / \delta|$ and global error rate $Err_g=|e-\delta / \sigma|$. 
+The estimation error is calculated as the following; we store influence score after each sketch rebuild on $\varsigma$ and sketch cardinality estimate of the candidate vertex on $e$. We calculate the marginal gain after the last sketch build, $\delta=\varsigma - \sigma$. Then, the local estimation error will be $Err_l=|e-\delta / \delta|$ \kktodo{deltayi deltaya niye boluyoruz, ne cikmasini bekliyoruz} and global error rate $Err_g=|e-\delta / \sigma|$. 
 The sketches are assumed as stale if the absolute error in the estimated total influence score, $Err_g$, is more than the global threshold, $\epsilon_{g}$, 
 and the marginal gain estimation error, $Err_l$, after the last sketch is larger than a local threshold $\epsilon_{l}$.
 
@@ -443,7 +446,7 @@ whereas our method includes the time since it is crucial for keeping the sketche
 \begin{figure}[h] 
     \centering
     \includegraphics[width=1\linewidth]{images/converge-performance.pdf}
-  \centering \caption{Geometic mean of \acro's performance and results quality on different $\epsilon_c$ parameters. ($J=256,\epsilon_l=0.3,\epsilon_g=0.01,\tau=18$) 
+  \centering \caption{Geometic mean of \acro's performance and results quality on different $\epsilon_c$ parameters ($J=256,\epsilon_l=0.3,\epsilon_g=0.01,\tau=18$). 
     \label{fig:conv-perf}} 
 \end{figure}
 
@@ -452,50 +455,6 @@ Since $\epsilon_{l}$ is the maximum error allowed after the last rebuild. Settin
 Even though \acro's behavior is not chaotic with respect to changes in parameters. The performance, both in terms of speed and quality of the results, depends on parameter selection. We conducted a grid search over several parameter combinations to illustrate how \acro performs with different parameters. Both the speed and the quality of the results on some of the largest datasets we have experimented shown in figure~\ref{fig:parameter-smallmultiples}.  We found that the parameters $\epsilon_{l}=0.3$ and $\epsilon_{global}=0.01$, used in our experiments, perform well in many datasets, both in terms of speed and quality.
 
 
-\begin{algorithm}
-\caption{\sc{\acro}($G,K,J$)}
-\label{algo:main}
-\algorithmicrequire{$G = (V,E)$: the influence graph
-\\\hspace*{6.6ex}{$K$: number of seed vertices
-\\\hspace*{6.7ex}$\mathcal{J}$: number of MC simulations}\\}
-\algorithmicensure{$S$: a seed set that maximizes influence on $G$
-}
-\begin{algorithmic}[1]
-    \State {$S \leftarrow \{\emptyset\}$}
-    \For{$ v\in V$} {\bf in parallel}
-        \For{$ j\in J$}
-            \State $M[j]_v \leftarrow clz(hash(v) \oplus hash(j))$ 
-        \EndFor
-    \EndFor
-    \State $M \leftarrow simulate(G,M,\emptyset)$
-    \State $M_{S'} \leftarrow zeros(J)$
-    \State $\varsigma \leftarrow 0$
-    \For{$k=1\ldots K$}
-        \State $s \leftarrow \underset{v\in V}{\mathrm{argmax}} ~estimate(merge(M_{S'},M_v))$
-        \State $S \leftarrow S \cup \{s\}$
-        \State $e \leftarrow estimate(merge(M_{S'},M_s))$
-        % \State $R_S \leftarrow run\_cascade(G,S,J)$
-        \State {Compute seed set $S$'s Reachability set $R_{G}(S)$ }
-        \State $\sigma_G(S) \leftarrow |R_{G}|/J$
-        \State $\delta = \sigma - \varsigma$
-        \State $Err_l=|(e - \delta) / \delta|$
-        \State $Err_g=|e-\delta| / \sigma $
-        \If{$ Err_l < \epsilon_l \lor Err_g < \epsilon_g$} %FIXME
-            \State $M_{S'} \leftarrow merge(M_{S'},M_s)$
-        \Else
-            \For{$ v\in V$} {\bf in parallel}
-                \For{$ j\in J$}
-                    \State $M[j]_v \leftarrow clz(hash(v) \oplus hash(j))$ 
-                \EndFor
-            \EndFor
-            \State $M \leftarrow simulate(G,M,R_S)$
-            \State $M_{S'} \leftarrow zeros(J) $ 
-            \State $\varsigma \leftarrow \sigma $ 
-        \EndIf
-    \EndFor
-    \State \Return $S$
-\end{algorithmic}
-\end{algorithm}
 
 \begin{algorithm}[!ht]
 \caption{\sc{Simulate}($G,M,J,R_S$)}
@@ -546,8 +505,8 @@ In CSR, an array, $index$, holds the starting indices of each neighboring vertex
 To enter the neighbors of vertex $i$ we first visit $index[i]$ and $index[i+1]$ 
 to find the data's start and end positions, then search from $adj[index[i]]$ to $adj[index[i+1]]$. 
     
-\section{Evaluation}\label{sec:evaluation}
-We performed the experiments on a server with {\tt Intel Xeon Gold 6140}, running at 2.3 Ghz and 250 GB memory. All of the 18 cores are allowed in the experiments. The Operating System on the server was {\tt Ubuntu 16.04 LTS} with 5.4.0-48 kernel. The algorithms are implemented using {\tt C++20}, and compiled with {\tt GCC 9.2.0} with {\tt "-Ofast"} and {\tt "-march=native"} optimization flags. Multi-thread parallelization was achieved with {\tt OpenMP} pragmas. {\tt AVX2} instructions are utilized by handcrafted code with vector intrinsics.
+\section{Experimental Results}\label{sec:evaluation}
+We performed the experiments on a server with {\tt Intel Xeon Gold 6140}, running at 2.3 Ghz and 250 GB memory. All of the 18 cores are allowed in the experiments. The Operating System on the server was {\tt Ubuntu 16.04 LTS} with 5.4.0-48 kernel. The algorithms are implemented using {\tt C++20}, and compiled with {\tt GCC 9.2.0} with {\tt "-Ofast"} and {\tt "-march=native"} optimization flags. Multi-thread parallelization was achieved with {\tt OpenMP} pragwwmas. {\tt AVX2} instructions are utilized by handcrafted code with vector intrinsics.
 
 \begin{table}[!ht]
 \caption{Properties of networks used in the experiments}\label{tab:NetProps}
@@ -807,6 +766,7 @@ With the proposed method, \acro can achieve $\maxspeedupSKIM\times$ speed-up aga
 
 In the future, we would like to extend our work to a distributed GPGPU setting to process graphs with billions of vertices and edges. The main issue with \acro on such computation scheme is the broadcast of sketch registers; when vertices are partitioned to different computation units, resulting sketch updates should be communicated to all partitions. To overcome the issue, graph preprocessing and speculative diffusion strategies can reduce communication bottlenecks. 
 
+\kktodo{an analysis of a fast and better sketch to reduce the number of rebuilding stages}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
