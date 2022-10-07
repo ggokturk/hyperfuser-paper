@@ -1,0 +1,189 @@
+\relax 
+\citation{leskovec2007dynamics,trusov2009effects}
+\citation{zeng2010social,moreno2004dynamics}
+\citation{lu2012recommender}
+\citation{kempe2003maximizing}
+\citation{MixGreedy,narayanam2010shapley,kimura2007extracting,chen2010PMIA,chen2010LDAG,kim2013scalable,cohen2014sketch,goyal2011simpath,jung2012irie,cheng2014imrank,liu2014influence,galhotra2016holistic}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}\protected@file@percent }
+\citation{cohen2014sketch}
+\citation{nguyen2016stop}
+\citation{tim}
+\citation{minutoli2019fast}
+\citation{kempe2003maximizing}
+\citation{borgs2014maximizing}
+\citation{MixGreedy}
+\citation{ackermann}
+\citation{flajolet1985probabilistic}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Notation and Background}{2}{}\protected@file@percent }
+\newlabel{sec:background}{{2}{2}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Table of notations}}{2}{}\protected@file@percent }
+\newlabel{tab:notation}{{1}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Influence Maximization}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The directed graph $G = (V, E)$ for IC with independent diffusion probabilities.}}{2}{}\protected@file@percent }
+\newlabel{fig:ic}{{1}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Count-Distinct Sketches}{2}{}\protected@file@percent }
+\newlabel{sec:sketch}{{2.2}{2}}
+\citation{infuser}
+\citation{infuser}
+\citation{infuser}
+\newlabel{eq:sketch-add}{{1}{3}}
+\newlabel{eq:sketch-estimate}{{2}{3}}
+\newlabel{eq:sketch-merge}{{3}{3}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Error-Adaptive Influence Maximization}{3}{}\protected@file@percent }
+\newlabel{sec:method}{{3}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  (a)  Toy sketch initialization of vertex $x$ with four registers and 4-bit hash functions. (b)  Example of union operation on sketches of vertices $x$ and $y$ with four registers. (c)  Diffusion operation from vertex $v$ to vertex $u$ w.r.t sampling in $\hat  {G}$. }}{3}{}\protected@file@percent }
+\newlabel{fminit}{{2}{3}}
+\newlabel{fmmerge}{{2}{3}}
+\newlabel{fmwrite}{{2}{3}}
+\newlabel{fig:fmops}{{2}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Hash-based Fused Sampling}{3}{}\protected@file@percent }
+\citation{infuser}
+\newlabel{fig:sims}{{3a}{4}}
+\newlabel{sub@fig:sims}{{(a)}{a}}
+\newlabel{fig:fused}{{3b}{4}}
+\newlabel{sub@fig:fused}{{(b)}{b}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \relax \fontsize  {9bp}{10bp}\selectfont  { \subref {fig:sims} Two sampled subgraphs of the toy graph from Figure\nobreakspace  {}1\hbox {} with 4 vertices and 6 edges. \subref {fig:fused} The simulations performed are fused with sampling. Each edge is labeled with the corresponding sample/simulation IDs. }}}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {}}}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {}}}{4}{}\protected@file@percent }
+\newlabel{fig:traversal}{{3}{4}}
+\newlabel{eq:hash}{{4}{4}}
+\newlabel{eq:hash_prob}{{5}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Estimating Reachability Set Cardinality}{4}{}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces \sc  {{\sc  {HyperFuseR\xspace  }\xspace  }\xspace  }($G,K,{\cal  J}$)}}{4}{}\protected@file@percent }
+\newlabel{algo:main}{{1}{4}}
+\newlabel{line:for}{{8}{4}}
+\newlabel{line:estimate}{{9}{4}}
+\newlabel{line:e}{{11}{4}}
+\newlabel{line:if}{{18}{4}}
+\newlabel{line:else1}{{20}{4}}
+\newlabel{line:else2}{{25}{4}}
+\citation{kempe2003maximizing}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces InFuseR diffusion process illustrated for only vertex $1$ on toy sample graph. (a)  Toy graph InFuseR initialization. (b)  First level of diffusion using \emph  {push-based} method for vertex $1$. (c) Second level of diffusion following Fig.4\hbox {}(a). }}{5}{}\protected@file@percent }
+\newlabel{fig:infuserinit}{{4}{5}}
+\newlabel{infuserdiff1}{{4}{5}}
+\newlabel{fig:infuserdiff}{{4}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  diffusion process illustrated for \emph  {all} vertices on toy sample graph. (a) Toy sketch initialization. (b)  First level of diffusion using \emph  {Pull-based} method for \emph  {all} vertices. (c)  Second level diffusion following Fig.5\hbox {}(a), only updated vertices' sketches are pulled. }}{5}{}\protected@file@percent }
+\newlabel{hyperinit}{{5}{5}}
+\newlabel{hyperdiff1}{{5}{5}}
+\newlabel{hyperdiff2}{{5}{5}}
+\newlabel{fig:hyperdiff}{{5}{5}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces \sc  {Simulate}($G,M,{\cal  J},R_S$)}}{5}{}\protected@file@percent }
+\newlabel{algo:diffusion-step}{{2}{5}}
+\newlabel{ln:inner_start}{{4}{5}}
+\newlabel{ln:vec1}{{6}{5}}
+\newlabel{ln:early_exit}{{7}{5}}
+\newlabel{ln:update}{{8}{5}}
+\newlabel{ln:inner_end}{{10}{5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Error-adaptive sketch rebuilding}{5}{}\protected@file@percent }
+\citation{kempe2003maximizing}
+\citation{kempe2003maximizing}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  Effect of register saturation on {\tt  Amazon0302} dataset using {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  (${\cal  J}=256$) without rebuilding against Greedy($\mathcal  {R}=20000$) method\cite  {kempe2003maximizing}. }}{6}{}\protected@file@percent }
+\newlabel{fig:sketch-saturation}{{6}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Runtime Analysis}{6}{}\protected@file@percent }
+\newlabel{sec:runtime}{{3.3}{6}}
+\citation{nemhauser1978analysis}
+\citation{durand2003loglog}
+\newlabel{fig:lj-time}{{7a}{7}}
+\newlabel{sub@fig:lj-time}{{(a)}{a}}
+\newlabel{fig:Orkut-time}{{7b}{7}}
+\newlabel{sub@fig:Orkut-time}{{(b)}{b}}
+\newlabel{fig:Pokec-time}{{7c}{7}}
+\newlabel{sub@fig:Pokec-time}{{(c)}{c}}
+\newlabel{fig:lj-score}{{7d}{7}}
+\newlabel{sub@fig:lj-score}{{(d)}{d}}
+\newlabel{fig:Orkut-score}{{7e}{7}}
+\newlabel{sub@fig:Orkut-score}{{(e)}{e}}
+\newlabel{fig:Pokec-score}{{7f}{7}}
+\newlabel{sub@fig:Pokec-score}{{(f)}{f}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Effect of $\epsilon $ parameters on {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  (${\cal  J} = 256$, $\epsilon _c=0.02$) performance, using $\tau =16$ threads. Lighter shades are better. }}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {{\tt LiveJournal} execution time in seconds}}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {{\tt Orkut} execution time in seconds}}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {{\tt Pokec} execution time in seconds}}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {{\tt LiveJournal} influence score}}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(e)}{\ignorespaces {{\tt Orkut} influence score}}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(f)}{\ignorespaces {{\tt Pokec} influence score}}}{7}{}\protected@file@percent }
+\newlabel{fig:parameter-smallmultiples}{{7}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Approximation Ratio of {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  }{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Implementation Details}{7}{}\protected@file@percent }
+\citation{kempe2003maximizing}
+\citation{MixGreedy}
+\citation{kempe2003maximizing}
+\citation{kempe2003maximizing}
+\citation{MixGreedy}
+\citation{tim}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Results}{8}{}\protected@file@percent }
+\newlabel{sec:evaluation}{{4}{8}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Properties of networks used in the experiments}}{8}{}\protected@file@percent }
+\newlabel{tab:NetProps}{{2}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Experiment Settings}{8}{}\protected@file@percent }
+\newlabel{sec:expset}{{4.1}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Performance Metrics}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Algorithms evaluated in the experiments}{8}{}\protected@file@percent }
+\citation{bottomk}
+\citation{cohen2014sketch}
+\citation{minutoli2019fast}
+\citation{borgs2014maximizing}
+\citation{nguyen2016stop}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Comparing {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  with State-of-the-Art}{9}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Speed-up achieved by {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  {}\nobreakspace  {}(${\cal  J} = 256$) over {\sc  Imm}\nobreakspace  {}($\epsilon \mkern 1.5mu{=}\mkern 1.5mu0.5$) using $\tau =16$ threads. }}{9}{}\protected@file@percent }
+\newlabel{fig:vs-imm}{{8}{9}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Execution times\nobreakspace  {}(in secs), influence scores, and memory use\nobreakspace  {}(in GBs) with $K = 50$ seeds, $\tau =16$ threads, and $w=0.005$. Influence scores are given relative to {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  {}. The runs that did not finish in 5 hours or due to high memory use shown as "-". }}{10}{}\protected@file@percent }
+\newlabel{tab:timings0.005}{{3}{10}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Execution times\nobreakspace  {}(in secs), influence scores, and memory use\nobreakspace  {}(in GBs) with $K = 50$ seeds, $\tau =16$ threads, and $w=0.01$. Influence scores are given relative to {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  {}. The runs that did not finish in 5 hours or due to high memory use shown as "-". }}{10}{}\protected@file@percent }
+\newlabel{tab:timings0.01}{{4}{10}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Execution times\nobreakspace  {}(in secs), influence scores, and memory use\nobreakspace  {}(in GBs) with $K = 50$ seeds, $\tau =16$ threads, and $w=0.1$. Influence scores are given relative to {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  {}. The runs that did not finish in 5 hours or due to high memory use shown as "-". }}{10}{}\protected@file@percent }
+\newlabel{tab:timings0.1}{{5}{10}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Execution times\nobreakspace  {}(in secs), inf. scores, and memory use\nobreakspace  {}(in GBs) with $K = 50$ seeds, $\tau =16$ threads, and $w \in N(0.05,0.025)$. Influence scores are given relative to {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  {}. The runs that did not finish in 5 hours or due to high memory use shown as "-". }}{10}{}\protected@file@percent }
+\newlabel{tab:timingsN0.05}{{6}{10}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Execution times\nobreakspace  {}(in secs), influence scores, and memory use\nobreakspace  {}(in GBs) with $K = 50$ seeds, $\tau =16$ threads and $w \in U(0,0.1)$. Influence scores are given relative to {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  {}. The runs that did not finish in 5 hours or due to high memory use shown as "-". }}{11}{}\protected@file@percent }
+\newlabel{tab:timingsU0.1}{{7}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Speed-up achieved by {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  {}\nobreakspace  {}(${\cal  J} = 256$) over {\sc  Skim}\nobreakspace  {}($r\mkern 1.5mu{=}\mkern 1.5mu64,l\mkern 1.5mu{=}\mkern 1.5mu64$) using $\tau =16$ threads. }}{11}{}\protected@file@percent }
+\newlabel{fig:vs-skim}{{9}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Speed-up achieved by {\sc  {HyperFuseR\xspace  }\xspace  }\xspace  {}\nobreakspace  {}(${\cal  J} = 256$) over {\sc  Ssa}\nobreakspace  {}($\epsilon =0.2$) using $\tau =16$ threads. }}{11}{}\protected@file@percent }
+\newlabel{fig:vs-ssa}{{10}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Scalability with multi-threaded parallelism}{11}{}\protected@file@percent }
+\citation{infuser}
+\citation{cohen2014sketch}
+\citation{bottomk,cohen2015all}
+\citation{flajolet1985probabilistic}
+\citation{tim}
+\citation{nguyen2016stop}
+\citation{kumar2017information}
+\bibstyle{IEEEtranS}
+\bibdata{refs}
+\bibcite{ackermann}{1}
+\bibcite{borgs2014maximizing}{2}
+\bibcite{chen2010PMIA}{3}
+\bibcite{MixGreedy}{4}
+\bibcite{chen2010LDAG}{5}
+\bibcite{cheng2014imrank}{6}
+\bibcite{cohen2015all}{7}
+\bibcite{cohen2014sketch}{8}
+\bibcite{bottomk}{9}
+\bibcite{durand2003loglog}{10}
+\bibcite{flajolet1985probabilistic}{11}
+\bibcite{galhotra2016holistic}{12}
+\bibcite{goyal2011simpath}{13}
+\bibcite{infuser}{14}
+\bibcite{jung2012irie}{15}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Related Work}{12}{}\protected@file@percent }
+\newlabel{sec:relatedwork}{{5}{12}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion and Future Work}{12}{}\protected@file@percent }
+\newlabel{sec:conclusion}{{6}{12}}
+\@writefile{toc}{\contentsline {section}{References}{12}{}\protected@file@percent }
+\bibcite{kempe2003maximizing}{16}
+\bibcite{kim2013scalable}{17}
+\bibcite{kimura2007extracting}{18}
+\bibcite{kumar2017information}{19}
+\bibcite{leskovec2007dynamics}{20}
+\bibcite{liu2014influence}{21}
+\bibcite{lu2012recommender}{22}
+\bibcite{minutoli2019fast}{23}
+\bibcite{moreno2004dynamics}{24}
+\bibcite{narayanam2010shapley}{25}
+\bibcite{nemhauser1978analysis}{26}
+\bibcite{nguyen2016stop}{27}
+\bibcite{tim}{28}
+\bibcite{trusov2009effects}{29}
+\bibcite{zeng2010social}{30}
+\gdef \@abspage@last{13}
