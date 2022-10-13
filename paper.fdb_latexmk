@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex paper"] 1665152785 "paper.aux" "paper.bbl" "paper" 1665152812
+["bibtex paper"] 1665628789 "paper.aux" "paper.bbl" "paper" 1665628833
   "/usr/share/texmf-dist/bibtex/bst/ieeetran/IEEEtranS.bst" 1650181511 61730 614a61a3af01043d45925bdf2bd38471 ""
-  "paper.aux" 1665152812 14027 ab27e20e47959192945ba0bbb3dd4836 "pdflatex"
+  "paper.aux" 1665628833 14038 aab9e2fc0fbbc29cfb9e6b0e4061ce63 "pdflatex"
   "refs.bib" 1662143241 17707 98e75501e9f2cef5540fbe3cb769078d ""
   (generated)
   "paper.bbl"
   "paper.blg"
-["pdflatex"] 1665152812 "/home/gokhan/Papers/hyperfuser/paper.tex" "paper.pdf" "paper" 1665152812
-  "/home/gokhan/Papers/hyperfuser/paper.tex" 1665152811 170678 d15276f5b4709bd686d2117103b7dc37 ""
+["pdflatex"] 1665628832 "/home/gokhan/Papers/hyperfuser/paper.tex" "paper.pdf" "paper" 1665628833
+  "/home/gokhan/Papers/hyperfuser/paper.tex" 1665628831 171629 42ca577e18f32944c83b832e6fef9d15 ""
   "/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc" 1650183167 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texmf-dist/fonts/map/fontname/texfonts.map" 1650183167 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texmf-dist/fonts/tfm/adobe/courier/pcrr7t.tfm" 1650183167 960 379cc0019370a9e0208a0a3f949f847a ""
@@ -151,13 +151,13 @@
   "images/infuserdiff.pdf" 1665146615 19943 1c746f3aeab6808eb1a4d6a59052848c ""
   "images/samples.pdf" 1662143241 9056 c4400e266eb5af24a0d43f0b6fdaa1ba ""
   "images/sketch-saturation.pdf" 1662143241 14724 7306e277158c1d5efae31a78e234e177 ""
-  "images/sketchdiff.pdf" 1665146770 18149 d6d15a18cbde26f72ff6efe0474354e4 ""
+  "images/sketchdiff.pdf" 1665626808 16250 7a1d69547750dc38fcf791d2a5b25e37 ""
   "images/speedup-imm.pdf" 1662143241 18825 a6a3aada26259081c9135504ce295298 ""
   "images/speedup-skim.pdf" 1662143241 16412 01592b6265950fde068979d2e946a833 ""
   "images/speedup-ssa.pdf" 1662143241 18220 f5b5440757d89711bef1a8fa052ce645 ""
-  "paper.aux" 1665152812 14027 ab27e20e47959192945ba0bbb3dd4836 "pdflatex"
-  "paper.bbl" 1665152785 8124 0d9ae20cc3ee66cac474d27ed946018a "bibtex paper"
-  "paper.tex" 1665152811 170678 d15276f5b4709bd686d2117103b7dc37 ""
+  "paper.aux" 1665628833 14038 aab9e2fc0fbbc29cfb9e6b0e4061ce63 "pdflatex"
+  "paper.bbl" 1665628789 8124 0d9ae20cc3ee66cac474d27ed946018a "bibtex paper"
+  "paper.tex" 1665628831 171629 42ca577e18f32944c83b832e6fef9d15 ""
   (generated)
   "paper.aux"
   "paper.log"

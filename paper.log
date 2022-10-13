@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Arch Linux) (preloaded format=pdflatex 2022.9.3)  7 OCT 2022 17:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Arch Linux) (preloaded format=pdflatex 2022.9.3)  13 OCT 2022 05:40
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -413,111 +413,110 @@ LaTeX Font Info:    Trying to load font information for U+pzd on input line 175.
 File: upzd.fd 2001/06/04 font definitions for U/pzd.
 )
 LaTeX Font Info:    Calculating math sizes for size <8.03> on input line 175.
-LaTeX Font Info:    Calculating math sizes for size <9.53561> on input line 196.
-LaTeX Font Info:    Calculating math sizes for size <7.02625> on input line 206.
+LaTeX Font Info:    Calculating math sizes for size <9.53561> on input line 197.
+LaTeX Font Info:    Calculating math sizes for size <7.02625> on input line 207.
  [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
-LaTeX Font Info:    Calculating math sizes for size <9.03374> on input line 237.
+LaTeX Font Info:    Calculating math sizes for size <9.03374> on input line 238.
 <images/ic.pdf, id=18, 131.49126pt x 124.465pt>
 File: images/ic.pdf Graphic file (type pdf)
 <use images/ic.pdf>
-Package pdftex.def Info: images/ic.pdf  used on input line 326.
+Package pdftex.def Info: images/ic.pdf  used on input line 327.
 (pdftex.def)             Requested size: 75.88426pt x 71.8327pt.
  [2 <./images/ic.pdf>]
-<images/fmops.pdf, id=33, 456.70625pt x 121.45375pt>
+<images/fmops.pdf, id=32, 456.70625pt x 121.45375pt>
 File: images/fmops.pdf Graphic file (type pdf)
 <use images/fmops.pdf>
-Package pdftex.def Info: images/fmops.pdf  used on input line 421.
+Package pdftex.def Info: images/fmops.pdf  used on input line 422.
 (pdftex.def)             Requested size: 252.94499pt x 67.26677pt.
-<images/samples.pdf, id=34, 223.83624pt x 226.8475pt>
+ [3 <./images/fmops.pdf>]
+<images/samples.pdf, id=38, 223.83624pt x 226.8475pt>
 File: images/samples.pdf Graphic file (type pdf)
 <use images/samples.pdf>
-Package pdftex.def Info: images/samples.pdf  used on input line 455.
+Package pdftex.def Info: images/samples.pdf  used on input line 456.
 (pdftex.def)             Requested size: 126.47249pt x 128.176pt.
-<images/fused.pdf, id=35, 191.71625pt x 191.71625pt>
+<images/fused.pdf, id=39, 191.71625pt x 191.71625pt>
 File: images/fused.pdf Graphic file (type pdf)
 <use images/fused.pdf>
-Package pdftex.def Info: images/fused.pdf  used on input line 457.
+Package pdftex.def Info: images/fused.pdf  used on input line 458.
 (pdftex.def)             Requested size: 126.47249pt x 126.4746pt.
 
-Overfull \hbox (2.66994pt too wide) in paragraph at lines 455--462
+Overfull \hbox (2.66994pt too wide) in paragraph at lines 456--463
  [][][] 
  []
 
-[3 <./images/fmops.pdf>]
-LaTeX Font Info:    Trying to load font information for OMS+ppl on input line 541.
- (/usr/share/texmf-dist/tex/latex/psnfss/omsppl.fd
+LaTeX Font Info:    Trying to load font information for OMS+ppl on input line 542.
+(/usr/share/texmf-dist/tex/latex/psnfss/omsppl.fd
 File: omsppl.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ppl/m/n' in size <9.53561> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 541.
-<images/infuserdiff.pdf, id=40, 441.65pt x 162.6075pt>
-File: images/infuserdiff.pdf Graphic file (type pdf)
-<use images/infuserdiff.pdf>
-Package pdftex.def Info: images/infuserdiff.pdf  used on input line 579.
-(pdftex.def)             Requested size: 252.94499pt x 93.13136pt.
-<images/sketchdiff.pdf, id=41, 401.5pt x 176.66pt>
-File: images/sketchdiff.pdf Graphic file (type pdf)
-<use images/sketchdiff.pdf>
-Package pdftex.def Info: images/sketchdiff.pdf  used on input line 586.
-(pdftex.def)             Requested size: 252.94499pt x 111.29907pt.
- [4 <./images/samples.pdf> <./images/fused.pdf>]
-LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 643.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 542.
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 631.
  (/usr/share/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
+<images/sketchdiff.pdf, id=40, 391.4625pt x 176.66pt>
+File: images/sketchdiff.pdf Graphic file (type pdf)
+<use images/sketchdiff.pdf>
+Package pdftex.def Info: images/sketchdiff.pdf  used on input line 634.
+(pdftex.def)             Requested size: 252.94499pt x 114.15103pt.
+<images/infuserdiff.pdf, id=41, 441.65pt x 162.6075pt>
+File: images/infuserdiff.pdf Graphic file (type pdf)
+<use images/infuserdiff.pdf>
+Package pdftex.def Info: images/infuserdiff.pdf  used on input line 641.
+(pdftex.def)             Requested size: 252.94499pt x 93.13136pt.
+ [4 <./images/samples.pdf> <./images/fused.pdf>] [5 <./images/sketchdiff.pdf> <./images/infuserdiff.pdf>]
 LaTeX Font Info:    Font shape `OT1/phv/m/it' in size <9.53561> not available
-(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 648.
- [5 <./images/infuserdiff.pdf> <./images/sketchdiff.pdf>]
-<images/sketch-saturation.pdf, id=56, 433.62pt x 289.08pt>
+(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 649.
+<images/sketch-saturation.pdf, id=55, 433.62pt x 289.08pt>
 File: images/sketch-saturation.pdf Graphic file (type pdf)
 <use images/sketch-saturation.pdf>
-Package pdftex.def Info: images/sketch-saturation.pdf  used on input line 654.
+Package pdftex.def Info: images/sketch-saturation.pdf  used on input line 655.
 (pdftex.def)             Requested size: 252.94499pt x 168.63252pt.
-<images/heatmap_LiveJournal_time.pdf, id=57, 410.41031pt x 273.69063pt>
+<images/heatmap_LiveJournal_time.pdf, id=56, 410.41031pt x 273.69063pt>
 File: images/heatmap_LiveJournal_time.pdf Graphic file (type pdf)
 <use images/heatmap_LiveJournal_time.pdf>
-Package pdftex.def Info: images/heatmap_LiveJournal_time.pdf  used on input line 713.
+Package pdftex.def Info: images/heatmap_LiveJournal_time.pdf  used on input line 714.
 (pdftex.def)             Requested size: 170.9195pt x 113.9804pt.
-<images/heatmap_Orkut_time.pdf, id=58, 410.41031pt x 273.69063pt>
+<images/heatmap_Orkut_time.pdf, id=57, 410.41031pt x 273.69063pt>
 File: images/heatmap_Orkut_time.pdf Graphic file (type pdf)
 <use images/heatmap_Orkut_time.pdf>
-Package pdftex.def Info: images/heatmap_Orkut_time.pdf  used on input line 716.
+Package pdftex.def Info: images/heatmap_Orkut_time.pdf  used on input line 717.
 (pdftex.def)             Requested size: 170.9195pt x 113.9804pt.
-<images/heatmap_Pokec_time.pdf, id=59, 410.41031pt x 273.69063pt>
+<images/heatmap_Pokec_time.pdf, id=58, 410.41031pt x 273.69063pt>
 File: images/heatmap_Pokec_time.pdf Graphic file (type pdf)
 <use images/heatmap_Pokec_time.pdf>
-Package pdftex.def Info: images/heatmap_Pokec_time.pdf  used on input line 719.
+Package pdftex.def Info: images/heatmap_Pokec_time.pdf  used on input line 720.
 (pdftex.def)             Requested size: 170.9195pt x 113.9804pt.
 
-Overfull \hbox (2.83334pt too wide) in paragraph at lines 713--719
+Overfull \hbox (2.83334pt too wide) in paragraph at lines 714--720
  [][][] 
  []
 
-<images/heatmap_LiveJournal_score.pdf, id=60, 438.5153pt x 273.69063pt>
+<images/heatmap_LiveJournal_score.pdf, id=59, 438.5153pt x 273.69063pt>
 File: images/heatmap_LiveJournal_score.pdf Graphic file (type pdf)
 <use images/heatmap_LiveJournal_score.pdf>
-Package pdftex.def Info: images/heatmap_LiveJournal_score.pdf  used on input line 722.
+Package pdftex.def Info: images/heatmap_LiveJournal_score.pdf  used on input line 723.
 (pdftex.def)             Requested size: 170.9195pt x 106.67625pt.
-<images/heatmap_Orkut_score.pdf, id=61, 446.5453pt x 273.69063pt>
+<images/heatmap_Orkut_score.pdf, id=60, 446.5453pt x 273.69063pt>
 File: images/heatmap_Orkut_score.pdf Graphic file (type pdf)
 <use images/heatmap_Orkut_score.pdf>
-Package pdftex.def Info: images/heatmap_Orkut_score.pdf  used on input line 725.
+Package pdftex.def Info: images/heatmap_Orkut_score.pdf  used on input line 726.
 (pdftex.def)             Requested size: 170.9195pt x 104.7594pt.
-<images/heatmap_Pokec_score.pdf, id=62, 438.5153pt x 273.69063pt>
+<images/heatmap_Pokec_score.pdf, id=61, 438.5153pt x 273.69063pt>
 File: images/heatmap_Pokec_score.pdf Graphic file (type pdf)
 <use images/heatmap_Pokec_score.pdf>
-Package pdftex.def Info: images/heatmap_Pokec_score.pdf  used on input line 728.
+Package pdftex.def Info: images/heatmap_Pokec_score.pdf  used on input line 729.
 (pdftex.def)             Requested size: 170.9195pt x 106.67625pt.
 
-Overfull \hbox (2.83334pt too wide) in paragraph at lines 722--729
+Overfull \hbox (2.83334pt too wide) in paragraph at lines 723--730
  [][][][] 
  []
 
 [6 <./images/sketch-saturation.pdf>]
-Underfull \vbox (badness 3158) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [7 <./images/heatmap_LiveJournal_time.pdf> <./images/heatmap_Orkut_time.pdf
 
@@ -535,75 +534,76 @@ pdfTeX warning: pdflatex (file ./images/heatmap_Orkut_score.pdf): PDF inclusion:
 
 pdfTeX warning: pdflatex (file ./images/heatmap_Pokec_score.pdf): PDF inclusion: multiple pdfs with page group included in a single page
 >]
-Underfull \hbox (badness 1715) in paragraph at lines 792--794
+Underfull \hbox (badness 1715) in paragraph at lines 793--795
 \OT1/pcr/m/n/9.53561 Intel Xeon E5-2620 v4 \OT1/ppl/m/n/9.53561 CPU, run-ning at 2.10GHz,
  []
 
 
-Underfull \hbox (badness 5161) in paragraph at lines 792--794
+Underfull \hbox (badness 5161) in paragraph at lines 793--795
 \OT1/ppl/m/n/9.53561 is \OT1/pcr/m/n/9.53561 Ubuntu 20.04.2 LTS \OT1/ppl/m/n/9.53561 with 5.4.0-65 ker-nel. The
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 792--794
+Underfull \hbox (badness 10000) in paragraph at lines 793--795
 \OT1/ppl/m/n/9.53561 op-ti-miza-tion flags. Multi-thread par-al-leliza-tion was
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 792--794
+Underfull \hbox (badness 10000) in paragraph at lines 793--795
 
  []
 
 
-Overfull \vbox (7.875pt too high) detected at line 820
+Overfull \vbox (7.875pt too high) detected at line 821
  []
 
 [8]
 <images/speedup-imm.pdf, id=286, 552.05307pt x 364.16833pt>
 File: images/speedup-imm.pdf Graphic file (type pdf)
 <use images/speedup-imm.pdf>
-Package pdftex.def Info: images/speedup-imm.pdf  used on input line 1633.
+Package pdftex.def Info: images/speedup-imm.pdf  used on input line 1634.
 (pdftex.def)             Requested size: 252.94499pt x 166.8582pt.
- [9 <./images/speedup-imm.pdf>] [10]
-<images/speedup-skim.pdf, id=346, 557.35413pt x 364.16833pt>
+ [9] [10]
+<images/speedup-skim.pdf, id=293, 557.35413pt x 364.16833pt>
 File: images/speedup-skim.pdf Graphic file (type pdf)
 <use images/speedup-skim.pdf>
-Package pdftex.def Info: images/speedup-skim.pdf  used on input line 1643.
+Package pdftex.def Info: images/speedup-skim.pdf  used on input line 1644.
 (pdftex.def)             Requested size: 252.94499pt x 165.26897pt.
-<images/speedup-ssa.pdf, id=347, 557.35413pt x 364.16833pt>
+<images/speedup-ssa.pdf, id=294, 557.35413pt x 364.16833pt>
 File: images/speedup-ssa.pdf Graphic file (type pdf)
 <use images/speedup-ssa.pdf>
-Package pdftex.def Info: images/speedup-ssa.pdf  used on input line 1653.
+Package pdftex.def Info: images/speedup-ssa.pdf  used on input line 1654.
 (pdftex.def)             Requested size: 252.94499pt x 165.26897pt.
- [11 <./images/speedup-skim.pdf> <./images/speedup-ssa.pdf
+ [11 <./images/speedup-imm.pdf> <./images/speedup-skim.pdf
+
+pdfTeX warning: pdflatex (file ./images/speedup-skim.pdf): PDF inclusion: multiple pdfs with page group included in a single page
+> <./images/speedup-ssa.pdf
 
 pdfTeX warning: pdflatex (file ./images/speedup-ssa.pdf): PDF inclusion: multiple pdfs with page group included in a single page
 >]
-Underfull \hbox (badness 10000) in paragraph at lines 1696--1697
+Underfull \hbox (badness 10000) in paragraph at lines 1697--1698
 []\OT1/ppl/m/n/9.53561 The stop-and-stare al-go-rithm pro-posed by
  []
 
-(./paper.bbl
+(./paper.bbl [12]
 Underfull \hbox (badness 5939) in paragraph at lines 96--99
 []\OT1/ppl/m/n/8.03 G. G[]okt[]urk and K. Kaya, ``Boost-ing par-al-lel influence-
  []
 
-[12]) [13
-
-] (./paper.aux) ) 
+) [13] (./paper.aux) ) 
 Here is how much of TeX's memory you used:
  8111 strings out of 478238
  134089 string characters out of 5850457
- 512075 words of memory out of 5000000
+ 515192 words of memory out of 5000000
  26199 multiletter control sequences out of 15000+600000
  527703 words of font info for 171 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,15n,63p,2368b,475s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,15n,63p,2719b,475s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></usr/share/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/palatino/uplri8a.pfb></usr/share/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb>
-Output written on paper.pdf (13 pages, 591842 bytes).
+Output written on paper.pdf (13 pages, 590750 bytes).
 PDF statistics:
- 561 PDF objects out of 1000 (max. 8388607)
- 200 compressed objects within 2 object streams
+ 560 PDF objects out of 1000 (max. 8388607)
+ 199 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  81 words of extra memory for PDF output out of 10000 (max. 10000000)
 
