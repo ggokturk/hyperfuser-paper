@@ -177,8 +177,8 @@ pdfkeywords={Influence Maximization, Graph Processing, Graph Sampling, Fused Sam
 %     \fixme{
 Influence maximization~(IM) is the problem of finding a seed vertex set that maximizes the expected number of vertices influenced under a given diffusion model. Due to the NP-Hardness of finding an optimal seed set, approximation algorithms are frequently used for IM. 
 % }
-In addition to these high-quality yet expensive approximation algorithms, lightweight, sketch-based approaches which do not step-by-step simulate the diffusion process have been proposed in the literature to cope with the scale of today's networks. 
-In this work, we describe a fast, error-adaptive approach that leverages Count-Distinct sketches and hash-based fused sampling to estimate the number of influenced vertices throughout a diffusion. We use per-vertex Flajolet-Martin sketches where each sketch corresponds to a sampled subgraph. To efficiently simulate the diffusions, the reach-set cardinalities of a single vertex are stored in memory in a consecutive fashion. This allows the proposed algorithm to estimate the number of influenced vertices in a single step for simulations at once. %In addition, thanks to their efficiency, and the scalability of our parallel implementation, we can rebuild the sketches whenever it is necessary. 
+In addition to these high-quality yet expensive approximation algorithms, lightweight, sketch-based approaches, which do not step-by-step simulate the diffusion process, have been proposed in the literature to cope with the scale of today's networks. 
+In this work, we describe a fast, error-adaptive approach that leverages Count-Distinct sketches and hash-based fused sampling to estimate, not to count, the number of influenced vertices throughout a diffusion. We use per-vertex Flajolet-Martin sketches where each sketch corresponds to a sampled subgraph. To efficiently simulate the diffusions, the reach-set cardinalities of a single vertex are stored in memory in a consecutive fashion. This allows the proposed algorithm to estimate the number of influenced vertices in a single step for simulations at once. %In addition, thanks to their efficiency, and the scalability of our parallel implementation, we can rebuild the sketches whenever it is necessary. 
 For a faster IM kernel, we rebuild the sketches in parallel only after observing estimation errors above a given threshold. Our experimental results show that the proposed algorithm yields comparable seed sets while being up to $3,337\times$ faster than a state-of-the-art, high-quality influence maximization algorithm. In addition, it is up to $63\times$ faster than a sketch-based approach while producing seed sets with $2\%$--$10\%$ better influence scores.
 \end{abstract}
 % } 
@@ -212,7 +212,7 @@ Simulating a greedy algorithm in \fixme{parallel} is a \fixme{straightforward} w
 
 \item Once it is read from the memory, \acro processes all samples of a single edge together. The suggested approach, therefore, decreases the pressure on the memory subsystem. Furthermore, it employs vector compute units to its near maximum efficiency to regularize memory accesses.
 
-\item We evaluate the runtime performance, memory consumption, and influence score of sketch- and approximation-based state-of-the-art influence maximization algorithms, namely {\sc Skim}~\cite{cohen2014sketch}, {\sc SSA}~\cite{nguyen2016stop}, {\sc Tim+}~\cite{tim} and {\sc Imm}~\cite{minutoli2019fast}, to accurately position the performance of \acro{} within the IM literature. The experiments show that \acro can be $63\times$ and $3337\times$ faster than a state-of-the-art sketch-based and high-quality approximation algorithm, respectively while reaching the influence quality of the accurate algorithms with less memory.
+\item We evaluate the runtime performance, memory consumption, and influence score of sketch- and approximation-based state-of-the-art influence maximization algorithms, namely {\sc Skim}~\cite{cohen2014sketch}, {\sc SSA}~\cite{nguyen2016stop}, {\sc Tim+}~\cite{tim} and {\sc Ripples}~\cite{minutoli2019fast}, to accurately position the performance of \acro{} within the IM literature. The experiments show that \acro can be $63\times$ and $3337\times$ faster than a state-of-the-art sketch-based and high-quality approximation algorithm, respectively while reaching the influence quality of the accurate algorithms with less memory.
 
 \end{itemize}
 
@@ -322,7 +322,7 @@ In the literature, {\em independent} and {\em weighted cascade}~(IC and WC), and
 % \end{itemize}
 
 % \setlength{\columnsep}{1.2pt}%
-\begin{wrapfigure}{r}{0.3\linewidth}
+\begin{wrapfigure}{r}{0.35\linewidth}
     \begin{center}
       \includegraphics[width=1\linewidth]{images/ic.pdf}
     \end{center}
@@ -352,7 +352,7 @@ We concentrate on the IC model in this paper, but although their adaptation requ
 %   \label{fig:xx} 
 % \end{figure}
 
-The {\em distinct element count} problem focuses on finding the number of distinct elements in a stream where the elements are coming from a universal set ${\cal U}$. Finding the number of vertices to be influenced of a candidate seed vertex $u$, i.e., the cardinality of $u$'s {\em reachability set}, is a similar problem. For each sample subgraph, the number of visited vertices is found while traversing the subgraphs starting from $u$. Note that an exact, linear-time computation of stream cardinality requires memory proportional to the universal set cardinality, i.e., ${\Theta}(|{\cal U}|)$. 
+The {\em distinct element count} problem focuses on finding the number of distinct elements in a stream where the elements are coming from a universal set ${\cal U}$. Finding the number of vertices to be influenced of a candidate seed vertex $u$, i.e., the cardinality of $u$'s {\em reachability set}, is a similar problem. For each sample subgraph, the number of visited vertices is found while traversing the subgraphs starting from $u$. Note that an exact, linear-time computation of stream cardinality requires memory proportional to the universal set cardinality, i.e., ${\Theta}(|{\cal U}|)$. Via sketches, \acro can estimate the reachability set cardinalities with much less memory and computation compared to the exact counting solutions. 
 
 The reachability set of a vertex is the union of all its connected vertices (via outgoing edges). Many IM kernels exploit this property to some degree. The methods based on {\em reverse reachability} \cite{borgs2014maximizing} %\kktodo{cite}\ggx{done.} 
 %and {\em bottom-up traversal} \\kktodo{cite} \ggx{buna referans dusunmem gerekli}
@@ -360,13 +360,13 @@ utilize this property directly to merge the reachability sets of connected verti
 goes one step further; it utilizes the fact that for an undirected graph, all vertices in a connected component have the same reachability set. Therefore, all the reachability sets within a single sample subgraph can be found via a single graph traversal. 
 
 For directed graphs, storing reachability sets for all vertices and merging these sets are infeasible for nontrivial graphs. 
-If one-hot vectors are used to store the reachability sets for constant insertion time, $\Theta(n^2\mathcal{R})$ bits of memory is required where each merge operation has $\Theta(n)$ time complexity. 
+If one-hot vectors are used to store the reachability sets for constant insertion time, $\Theta(n^2\mathcal{R})$ bits of memory are required where each merge operation has $\Theta(n)$ time complexity. 
 If disjoints sets are used for storing reachability sets; $\mathcal{O}(n{\sigma}\mathcal{R})$ 
 %\kktodo{Gokhan bunu aciklayalim, bir de $\bar{\sigma}$ nedir}\ggx{estimated influence} 
 memory is required to store all reachability sets, and each merge operation has $\mathcal{O}({\tt Ack}(\sigma))$ complexity where ${\tt Ack}$ is the Ackermann~\cite{ackermann} function. %\kktodo{bu Ackermann'a atif verelim}.\ggx{done.}
 
 
-Count-Distinct~Sketches can be leveraged to estimate a reachability set's cardinality efficiently; for instance, the Flajolet–Martin~(FM) sketch~\cite{flajolet1985probabilistic} uses a constant number, ${\cal J}$, of registers where ${\cal J}$ can be increased for better estimates. Furthermore, the union of two sketches can be computed in constant time which is a necessary property for an efficient estimation of reachability set cardinalities. The essence of an FM sketch is that it keeps the track of how rare the elements are in a stream. The rarity of the stream is estimated by counting the maximum number of leading zeros in the stream elements' hash values. Initially, each register is initialized with zero. The items are hashed one by one, and the length of the longest all-zero prefix is stored in the register. With a single register, the cardinality estimation can be done by computing the power $2^r$ where $r$ is the value in the register.
+Count-Distinct~Sketches can be leveraged to estimate a reachability set's cardinality efficiently; for instance, the Flajolet–Martin~(FM) sketch~\cite{flajolet1985probabilistic} uses a constant number, ${\cal J}$, of registers where ${\cal J}$ can be increased for better estimates. Furthermore, the union of two sketches can be computed in constant time which is a necessary property for an efficient estimation of reachability set cardinalities. The essence of an FM sketch is that it keeps track of how rare the elements are in a stream. The rarity of the stream is estimated by counting the maximum number of leading zeros in the stream elements' hash values. Initially, each register is initialized with zero. The items are hashed one by one, and the length of the longest all-zero prefix is stored in the register. With a single register, the cardinality estimation can be done by computing the power $2^r$ where $r$ is the value in the register.
 
 In practice, multiple, ${\mathcal J}$, registers and hash values, $M[j]$ and $h_j$, $1 \leq j \leq {\cal J}$, are used to reduce the variance of the estimation. For a sketch with multiple registers, the impact of adding an item $x \in \cal{U}$ is shown in~\eqref{eq:sketch-add}:
 \begin{equation}
@@ -389,7 +389,7 @@ In our implementation, the merge operations are performed if and only if there i
 
 \section{Error-Adaptive Influence Maximization}\label{sec:method}
 
-HyperFuser uses \emph{directed} fused sampling, utilizes \emph{sketches} for both influence estimation and seed selection, and a novel error-adaptive sketch rebuilding strategy. On the other hand, {\sc InFuseR}~\cite{infuser} employs {\emph {undirected}} hash-based fused sampling and CELF optimizations for seed selection.
+\acro{} uses {\em directed} fused sampling, utilizes \emph{sketches} for both influence estimation and seed selection, and a novel error-adaptive sketch rebuilding strategy. An IM tool leveraging fusing is~{\sc InFuseR}~\cite{infuser} which employs {\emph {undirected}} hash-based fused sampling and CELF optimizations~\cite{CELF} for seed selection to find the best seed set. Unlike {\sc InFuseR}, \acro{} follows a completely different approach and only estimates the cardinalities of the reachability sets and do not compute them. 
 
 Most IM algorithms have the same few steps to find the best seed vertex set; sampling, building the influence oracle, verifying the impact of new candidates, and removing the latent seed set's residual reachability set. Following the idea proposed in~\cite{infuser}, \acro fuses the sampling step with other steps to avoid reading the graph multiple times. 
 
@@ -410,23 +410,6 @@ Most IM algorithms have the same few steps to find the best seed vertex set; sam
 %   \end{wrapfigure}
 
 
-Throughout the process, each register is used only for a single sample/simulation. 
-For an edge ($u, v$) in simulation $j$ where $v$ is a live vertex, an update, i.e., a merge operation, on $u$'s register is performed on the corresponding register $M_u$[$j$], i.e., $M_u[j] = max(M_u[j],M_v[j])$. 
-The toy example in Fig.~\ref{fig:fmops} shows how the sketch operations are done on a toy problem. In Fig.~\ref{fig:fmops}(a), the sketches, in a toy problem with 4 samples and 4-bit hash functions, are initialized; the id of vertex $u$ is hashed and leading zeros of the hash are written to registers. In Fig.~\ref{fig:fmops}(a), the merge operation is illustrated on registers of vertex $u$, $M_u$, and vertex $v$, $M_v$; merge operation takes element-wise maximum of registers to find union of the reachability sets. Fig.~\ref{fig:fmops} shows writing the merged reachability sets back to registers w.r.t sampling using a conditional move operation. In the example, we see four possible situations that can happen; The operations on the first registers show moving bigger register $M_v[1]$ to $M_u[0]$. The second one shows the opposite, a bigger number is on the target register and there is no edge between $u$ and $v$ in sample graph $\hat{G}$. The third one shows an example when $M_v[3]$ is bigger than $M_u[3]$ but there is no edge between $u$ and $v$ in sample graph $\hat{G}$. The operations on the fourth register show when there is an edge between $u$ and $v$ but $M_u[4]$ is smaller than $M_v[4]$ so the move operation is not needed. 
-
-%if and only if the edge exists in the sample and \kktodo{bunu da degistirdim}\ggx{biz bunu yapmiyoruz, ben burada kayboldum.} $u$ is {\em live} in the current iteration. 
-%A merge operation between sketch $M_u$,$M_v$ of vertices $u$,$v$,is only performed on $j$th register if there is a live edge between $u,v$ in sample $j$.
-
-\begin{figure}[!ht]
-    \begin{center}
-    \includegraphics[width=\linewidth]{images/fmops.pdf}
-    \caption{ (a) \label{fminit} Toy sketch initialization of vertex $x$ with four registers and 4-bit hash functions. (b) \label{fmmerge} Example of union operation on sketches of vertices $x$ and $y$ with four registers. (c) \label{fmwrite} Diffusion operation from vertex $v$ to vertex $u$ w.r.t sampling in $\hat{G}$. 
-     }\label{fig:fmops} 
-    \end{center}
-\end{figure}
-
-That is, at each iteration, vertices (outgoing) neighbors' reachability sets are added to their sketches.
-This recursive formulation of the influence iteratively relays the reachability information among the vertices, allowing us to estimate the marginal influence for all vertices very fast.
 %At each iteration, the sketches of the existing reachable vertices are modified. \kktodo{onceki cumleyi de degistirdim - dogru mu} \ggx{her vertex başkasına reachable olabilir, son cumleyi çıkartabilirz}
 %Instead of simulating the diffusion sample-by-sample, vertex-by-vertex, or path-by-path, all the influence that passes through the edges in a single step is processed together. 
 
@@ -437,9 +420,9 @@ This recursive formulation of the influence iteratively relays the reachability 
 %     \caption{Example of writing merged sketch $M_{xy}$ in fig.\ref{fmmerge} back to $M_x$ w.r.t diffusion process.}
 %   \end{wrapfigure}
 
-After estimating the reachability set cardinalities, \acro picks the vertex $v$ with the largest cardinality by evaluating the sketches. Then it finds the (actual) reachability set of the latent seed set, which is the union of the reachability sets of $v$ and the vertices in the seed set, by performing Monte-Carlo simulations. The vertices in this reachability set are removed from the live set $L$. %labeled as {\em visited}. 
+\acro performs $K$ iterations to find $K$ vertices. Each iteration starts by estimating the reachability set cardinalities for all the vertices and keeping this information within sketches. After this, \acro picks the vertex $v$ with the largest cardinality by evaluating these sketches. It then finds the (actual) reachability set of the latent seed set, which is the union of the reachability sets of $v$ and the vertices in the seed set, by performing Monte-Carlo simulations. The vertices in this reachability set are removed from the live set $L$. %labeled as {\em visited}. 
 %\kktodo{niye blocked, influenced desek?}\ggx{literaturde kullanilan terim o sekilde, ben visited'i tercih ederdim, algorithmaya gore live set L den çıkartıyoruz diye güncelledim.} 
-Hence, in later iterations, these vertices will not contribute to the marginal gain. Finally, the algorithm checks if rebuilding is necessary for the sketches based on the difference between the sketch estimate and Monte-Carlo estimate. The proposed approach and the algorithm will be described in this section in more detail starting with fused sampling.%\kktodo{yukaridaki cumlelerde bunlara isim verelim, burada soyleyelim matematiksel olarak - zaten isimleri var sanirim}.\ggx{malesef sembolleri,isimleri yok. $u \notin R_S$ şeklinde.} 
+Hence, in later iterations, these vertices will not contribute to the marginal gain. Although the same sketch memory can be used for a couple of iterations, i.e., seed vertex searches, we have observed that sketches become dirty and a rebuild is necessary. Hence, finally, the algorithm checks if sketch rebuilding is necessary based on the difference between the sketch estimate and Monte-Carlo estimate. The proposed approach and the algorithm is described here in more detail starting with fused sampling.%\kktodo{yukaridaki cumlelerde bunlara isim verelim, burada soyleyelim matematiksel olarak - zaten isimleri var sanirim}.\ggx{malesef sembolleri,isimleri yok. $u \notin R_S$ şeklinde.} 
 
 \subsection{Hash-based Fused Sampling}
 The probabilistic nature of cascade models \fixme{requires} sampling \fixme{subgraphs from $G = (V, E)$ to simulate the diffusion process}. If performed individually as a preprocessing step, as the literature traditionally does, sampling can be an expensive stage, furthermore, a time-wise dominating one for the overall IM kernel. That is first, sampling multiple sub-graphs may demand multiple passes on the graph, which can be very large and expensive to stream to the computational cores, and second, if samples are memoized, the memory requirement can be a multiple of the graph size. 
@@ -513,8 +496,30 @@ The edge $(u,v)$ exists \fixme{in the sample $r$ if and only if  ${P}(u,v)_r$ is
 %Traditional implementations sample each edge in $G$ once per simulation and store them to construct a sampled subgraph. n
 %Being able to generate the samples on the fly allows us to avoid many memory accesses. 
 % One of the downsides of hash-based fused sampling is that we have to generate all these random values,  $P(u,v)_r$, for each edge traversal and each simulation $r$. As mentioned above, the edges' hash values are precomputed for all the edges in $E$ to reduce computation cost and leverage fused sampling's performance gains. %Fortunately, the rest of the operations, i.e., one XOR and one division, are very fast on modern computing hardware. %The trade-off between extra memory and computation here maybe not be applicable for different computation architectures and faster/simpler hash functions.
+\subsection{Estimating Reachability Set Cardinalities}
 
-\subsection{Estimating Reachability Set Cardinality}
+To estimate the cardinality of a reachability set, \acro{} performs a cheap diffusion process over the sample subgraphs by using a single sketch register for a single sample/simulation. 
+For an edge ($u, v$) in simulation $j$ where $v$ is a live vertex, an update, i.e., a merge operation, on $u$'s register is performed on the corresponding register $M_u$[$j$], i.e., $M_u[j] = max(M_u[j],M_v[j])$. 
+The toy example in Fig.~\ref{fig:fmops} with  ${\cal J} = 4$ shows how the sketch operations are done on a toy problem. In Fig.~\ref{fig:fmops}(a), the sketches, in a toy problem with 4 samples and 4-bit hash functions, are initialized; the id of vertex $u$ is hashed and leading zeros of the hash are written to registers. In Fig.~\ref{fig:fmops}(b), the merge operation is illustrated on registers of vertex $u$, $M_u$, and vertex $v$, $M_v$; merge operation takes element-wise maximum of registers to find union of the reachability sets. All these operations are performed using vectorized instructions. 
+
+ To vectorize the rest of the process, we leverage conditional move operations. Although an edge ($u, v$) is inside the graph, it may not be in all the samples. In the toy example of Fig.~\ref{fig:fmops}, we assume that ($u, v$) only exists in the first and the last sample. 
+ Fig.~\ref{fig:fmops}(c) writes the merged reachability sets back to $u$'s registers. For the first sample, $M_u[1]$ needs an update. The operations for the second and the third rows/samples are skipped since ($u, v$) does not exist in these samples. The fourth row shows the case with ($u$, $v$) is in the sample but $M_u[4] < M_v[4]$. Hence, the move operation is not needed. However, for such cases, we still perform this write as a part of the vectorized operation. This being said, we skip the whole Fig.~\ref{fig:fmops}(c) when ($u, v$) is not in any of these samples.   
+
+%if and only if the edge exists in the sample and \kktodo{bunu da degistirdim}\ggx{biz bunu yapmiyoruz, ben burada kayboldum.} $u$ is {\em live} in the current iteration. 
+%A merge operation between sketch $M_u$,$M_v$ of vertices $u$,$v$,is only performed on $j$th register if there is a live edge between $u,v$ in sample $j$.
+
+\begin{figure}[!ht]
+    \begin{center}
+    \includegraphics[width=\linewidth]{images/fmops.pdf}
+    \caption{ (a) \label{fminit} Toy sketch initialization of vertex $u$ with four registers and 4-bit hash functions. (b) \label{fmmerge} Example of union operation on sketches of vertices $u$ and $v$ with four registers. (c) \label{fmwrite} Diffusion operation from vertex $v$ to vertex $u$ w.r.t. sampled subgraph. 
+     }\label{fig:fmops} 
+    \end{center}
+\end{figure}
+
+To summarize, at each iteration, vertices (outgoing) neighbors' reachability sets are added to their sketches.
+This recursive formulation of the influence iteratively relays the reachability information among the vertices, allowing us to estimate the marginal influence for all vertices very fast.
+
+\subsection{Finding the Seed Set}
 A greedy solution to IM requires finding a vertex with a maximum marginal influence at each step until the seed set size reaches $K$.
 An exact computation of marginal influences, i.e., the additional influence when a vertex $v$ is added to the seed set, requires the computation of all candidate vertices' reachability sets within all the samples. This involves many graph traversals and is expensive even with various algorithmic optimizations and a scalable parallelized implementation, e.g., see~\cite{infuser}. %The influence estimation problem is quite similar to the Count-Distinct problem applied to all sample subgraphs, as explained above. Hence, 
 In this work, we pursue the idea of using Count-Distinct sketches to estimate marginal influence scores. Here we propose an efficient and effective IM algorithm, \acro, that utilizes Flajolet–Martin sketches described in Section~\ref{sec:sketch} to estimate the averages of distinct elements in the sampled subgraphs. Algorithm~\ref{algo:main} shows the steps taken by \acro.
@@ -628,18 +633,21 @@ If any of $u$'s sketch registers changes during this operation, it is added to t
 %     \end{center}
 %     \end{figure*} 
  
-The traditional Greedy algorithm~\cite{kempe2003maximizing} processes the simulations one-by-one and computes the vertices' reachability sets. On the other hand, \acro efficiently performs multiple simulations at once in a single-step iteration (which processes distance-1 neighborhoods). Since each iteration relays one level of cardinality information, this step requires at most $d$ iterations where $d$ is the diameter of $G$. Note that when processed individually (as the Greedy algorithm), the $j$th simulation over the sampled subgraph $G_j$ would require only at most $d_j$ iterations, which is the diameter of $G_j$, and probably much smaller than $d$ considering the sampled subgraphs being highly sparse. However, $d$ is also a loose upper bound for \acro. A better one is {\tt max}$\{d_j: 1 \leq j \leq {\cal J}\} + 1$ where $d_j$ is the diameter of $G_j$. We have observed that during these simulations later iterations have only a minor impact on the marginal influence scores. Hence, to further reduce the overhead of concurrent simulation processing and avoid bottleneck simulations due to remaining perimeter structures (e.g., paths on the perimeter), we employ an early-exit threshold $\epsilon_c$ over the remaining live vertices ratio, which is expected to be very small when only one or two (bottleneck) simulations remain. That is if $|L'| \leq |V| \times \epsilon_c$ the diffusion process in Algorithm~\ref{algo:diffusion-step} stops. Otherwise, $L$ is set to $L'$, $L'$ is cleared, and the next iteration starts. We used $\epsilon_c = 0.02$ to make \acro faster while keeping its quality almost the same. Figure~\ref{fig:hyperdiff} shows a toy problem diffusion process on 4 vertices and a single sample, the process initializes sketches using respective hashes' leading zeros and bigger numbers are pulled from all recently changed neighbors. Whereas Infuser works vertices one by one, labeling visited vertices for the processed vertex. The process is repeated for multiple vertices until a seed vertex is found. Figure~\ref{fig:infuserdiff} shows an example in the same settings as Figure~\ref{fig:hyperdiff} to emphasize the difference between the two algorithms. Please notice that in the given examples, \acro{} computes estimated influence for \emph{all} vertices, whereas InFuseR only computes influence for vertex $1$. Due to this reason, on Figure~\ref{fig:infuserdiff} reachability sets are shown for all vertices with dense vectors, the sets that are not currently manipulated are greyed out in the figure.
+The traditional Greedy algorithm~\cite{kempe2003maximizing} processes the simulations one-by-one and computes the vertices' reachability sets. On the other hand, \acro efficiently performs multiple simulations at once in a single-step iteration (which processes distance-1 neighborhoods). Since each iteration relays one level of cardinality information, this step requires at most $d$ iterations where $d$ is the diameter of $G$. Note that when processed individually (as the Greedy algorithm), the $j$th simulation over the sampled subgraph $G_j$ would require only at most $d_j$ iterations, which is the diameter of $G_j$, and probably much smaller than $d$ considering the sampled subgraphs being highly sparse. However, $d$ is also a loose upper bound for \acro. A better one is {\tt max}$\{d_j: 1 \leq j \leq {\cal J}\} + 1$ where $d_j$ is the diameter of $G_j$. We have observed that during these simulations later iterations have only a minor impact on the marginal influence scores. Hence, to further reduce the overhead of concurrent simulation processing and avoid bottleneck simulations due to remaining perimeter structures (e.g., paths on the perimeter), we employ an early-exit threshold $\epsilon_c$ over the remaining live vertices ratio, which is expected to be very small when only one or two (bottleneck) simulations remain. That is if $|L'| \leq |V| \times \epsilon_c$ the diffusion process in Algorithm~\ref{algo:diffusion-step} stops. Otherwise, $L$ is set to $L'$, $L'$ is cleared, and the next iteration starts. We used $\epsilon_c = 0.02$ to make \acro faster while keeping its quality almost the same. 
+
+Figure~\ref{fig:hyperdiff} shows a toy diffusion process on four vertices and a single sample. The process initializes sketches using respective hashes' number of leading zeros. Then larger numbers are started to be pulled from all recently changed neighbors. The same process is repeated for multiple vertices until the new seed vertex is found. To understand the benefits of estimating (instead of counting), we present Fig.~\ref{fig:infuserdiff} which shows an example in the same settings as Fig.~\ref{fig:hyperdiff}. One very important observation is that, in these examples, \acro{} computes the estimated influence for \emph{all} vertices with a single process, whereas {\sc InFuseR}, or another counting-based IM algorithm, only computes influence for a single vertex (vertex one in the example). Doing otherwise, i.e., computing the reachability set cardinalities for all the vertices at once for a given sample, may require $\mathcal{O}(n^2)$ memory and union operations with $\mathcal{O}(n)$ complexity. Although using CELF~\cite{CELF} optimization partially eliminates this problem by focusing only a few vertices, $\mathcal{O}(n)$ union complexity still remains.
+%This is why although the reachability sets in Fig.~\ref{fig:infuserdiff} are shown for all vertices with dense vectors, the ones except that of vertex 1 are greyed out since they are not manipulated.
 \begin{figure}[!ht]
     \begin{center}
-    \includegraphics[width=\linewidth]{images/sketchdiff.pdf}
-    \caption{\acro diffusion process illustrated for \emph{all} vertices on toy sample graph. (a)\label{hyperinit} Toy sketch initialization. (b) \label{hyperdiff1} First level of diffusion using \emph{Pull-based} method for \emph{all} vertices. (c) \label{hyperdiff2} Second level diffusion following Fig.\ref{fig:hyperdiff}(a), only updated vertices' sketches are pulled. 
+    \includegraphics[width=0.95\linewidth]{images/sketchdiff.pdf}
+    \caption{\acro diffusion process illustrated for \emph{all} vertices on toy sample graph. (a)\label{hyperinit} Toy sketch initialization. (b) \label{hyperdiff1} First level of diffusion using \emph{Pull-based} method for \emph{all} vertices. (c) \label{hyperdiff2} Second level diffusion following (a); only updated vertices' sketches are pulled. 
      }\label{fig:hyperdiff} 
     \end{center}
 \end{figure}
 \begin{figure}[!ht]
     \begin{center}
-    \includegraphics[width=\linewidth]{images/infuserdiff.pdf}
-    \caption{InFuseR diffusion process illustrated for \emph{only vertex $1$} on toy sample graph.  (a) \label{fig:infuserinit} Toy graph InFuseR initialization.  (b) \label{infuserdiff1} First level of diffusion using \emph{push-based} method for vertex $1$. (c) Second level of diffusion following Fig.\ref{fig:infuserdiff}(a).
+    \includegraphics[width=0.85\linewidth]{images/infuserdiff.pdf}
+    \caption{{\sc InFuseR} diffusion process illustrated for \emph{only vertex $1$} on toy sample graph.  (a) \label{fig:infuserinit} Toy graph InFuseR initialization.  (b) \label{infuserdiff1} First level of diffusion using \emph{push-based} method for vertex $1$. (c) Second level of diffusion following Fig.\ref{fig:infuserdiff}(a).
      }\label{fig:infuserdiff} 
     \end{center}
 \end{figure}
@@ -821,7 +829,7 @@ We performed the experiments on a server with an 16-core {\tt Intel Xeon E5-2620
 }
 \end{table}
 % \FloatBarrier
-\subsection{Experiment Settings} \label{sec:expset}
+\subsection{Experimental Settings} \label{sec:expset}
 
 We performed the experiments on ten graphs~(four undirected, six directed). For comparability, graphs that have been frequently used within the Influence Maximization literature are selected. The properties of these graphs are given in Table~\ref{tab:NetProps}:  {\tt Amazon0302} is an Amazon co-purchase network, {\tt DBLP} is DBLP collaboration network, {\tt Orkut} is an online social network where users form friendship,  {\tt Youtube} is a video social video sharing platform that allows friendship relations, {\tt Epinions} is a consumer review trust network, {\tt Friendster} is a social gaming website where users can form friendship edge each other, {\tt LiveJournal} is a blogging site that allows users to add friends, {\tt Pokec} is the Slovakian poker game site friend network, and {\tt Slashdot} networks are friend-foe networks~(08-11, 09-11).
 
@@ -852,15 +860,15 @@ Since the algorithms may use different methods to measure the influence, the rep
 
 \subsection{Algorithms evaluated in the experiments}
 
-We evaluated our method against three other state-of-the-art influence maximization algorithms, {\sc Tim+}, {\sc Skim}, {\sc Imm}, and {\sc Ssa}. The first algorithm focuses on the influence score, whereas the second is a sketch-based algorithm that takes the execution time into account. The third one is a scalable, parallel approximation algorithm with a parameter to control the influence quality, and the last one leverages a Stop-and-Stare strategy.
+We evaluated our method against four other state-of-the-art influence maximization algorithms, {\sc Tim+}, {\sc Skim}, {\sc Ripples}, and {\sc Ssa}. The first algorithm focuses on the influence score, whereas the second is a sketch-based algorithm that takes the execution time into account. The third one is a scalable, parallel approximation algorithm with a parameter to control the influence quality, and the last one leverages a Stop-and-Stare strategy.
 
 \begin{itemize} [leftmargin=0.3cm]
 \item The Two-phased Influence Maximization~({\sc Tim+}) runs in two phases: {\em Parameter Estimation} which estimates the maximum expected influence and a parameter $\theta$ and {\em Node Selection} which randomly samples $\theta$ reverse reachability sets from $G$ and then derives a size-$K$ vertex-set $S$ that covers a large number of these sets~\cite{tim}. The algorithm has a parameter $\epsilon$ which allows a trade-off between the seed set quality and execution time. In our experiments, we set  $\epsilon=0.2$ to have a high-quality influence maximization baseline as suggested by the software. We also experimented with $\epsilon = 1.0$ as authors' suggested, which gives around $8\times$ speedup on average but a reduction on the influence score up to $9\%$.
 
 \item The Sketch-based Influence Maximization~({\sc Skim}) uses a combined bottom-$k$ min-hash reachability sketch~\cite{bottomk} to estimate the influence scores of the seed sets~\cite{cohen2014sketch}. As suggested by the authors, in this work, we employ {\sc Skim} with $k = 64$ and $\ell = 64$ sampled subgraphs. The implementation (from the authors) is partially parallelized and leverages multicore processors. However, it  assumes a constant $w$ value; hence, we only used {\sc Skim} for the first three settings given in Section~\ref{sec:expset}.
 
-\item Minutoli et al.'s {\sc Imm} is a high-performance, parallel algorithm that efficiently produces accurate seed sets~\cite{minutoli2019fast}. 
-It is an approximation method that improves the Reverse Influence Sampling~(RIS)~\cite{borgs2014maximizing} algorithm by eliminating the need for the threshold to be used. %{\sc Imm} generalizes the influence of all vertices on a small set of sample graphs that is sampled from the reachability sets of a few vertices. 
+\item Minutoli et al.'s {\sc Ripples} is a high-performance, parallel algorithm that efficiently produces accurate seed sets~\cite{minutoli2019fast}. 
+It is an approximation method that improves the Reverse Influence Sampling~(RIS)~\cite{borgs2014maximizing} algorithm by eliminating the need for the threshold to be used. %{\sc Ripples} generalizes the influence of all vertices on a small set of sample graphs that is sampled from the reachability sets of a few vertices. 
 We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilon$ is a user-defined parameter to control the approximation boundaries.
 
 \item Nguyen et al. proposed {\sc Ssa} and {\sc D-Ssa}~\cite{nguyen2016stop}, two novel sampling approaches for Influence Maximization problem. {\sc Ssa} and its dynamic network variant {\sc D-Ssa} are fast methods compared to previously mentioned approaches while providing similar approximation guarantees. The approach employs a novel Stop-and-Stare strategy. It stops at exponential checkpoints to verify (stare) if there is adequate statistical evidence on the solution quality. We used {\sc Ssa} for our benchmarks since our networks are static. 
@@ -899,7 +907,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrrr|rrrrrr|rrrrrr}
 % \toprule
 % {} & \multicolumn{6}{c|}{Time} & \multicolumn{6}{c|}{Score} & \multicolumn{6}{c}{Memory} \\
-% Method & \multicolumn{2}{c}{{\sc \acro}} &   {\sc Tim+} &    {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &  {\sc Imm} &   {\sc Skim} &  {\sc Ssa} \\
+% Method & \multicolumn{2}{c}{{\sc \acro}} &   {\sc Tim+} &    {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &  {\sc Ripples} &   {\sc Skim} &  {\sc Ssa} \\
 % R &        256 &     512 &    0.2 &    0.5 &   64-64 &     0.1 &        256 &        512 &     0.2 &     0.5 &   64-64 &     0.1 &        256 &    512 &   0.2 &  0.5 &  64-64 &  0.1 \\
 % Dataset                 &            &         &        &        &         &         &            &            &         &         &         &         &            &        &       &      &        &      \\
 % \midrule
@@ -931,7 +939,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrrr|rrrrrr|rrrrrr}
 % \toprule
 % {} & \multicolumn{6}{c|}{Time} & \multicolumn{6}{c|}{Score} & \multicolumn{6}{c}{Memory} \\
-% Method & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &    {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &   {\sc Imm} &  {\sc Skim} &   {\sc Ssa} \\
+% Method & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &    {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &   {\sc Ripples} &  {\sc Skim} &   {\sc Ssa} \\
 % R &        256 &     512 &     0.2 &    0.5 &   64-64 &     0.1 &         256 &         512 &     0.2 &     0.5 &   64-64 &     0.1 &        256 &    512 &   0.2 &   0.5 & 64-64 &   0.1 \\
 % Dataset                 &            &         &         &        &         &         &             &             &         &         &         &         &            &        &       &       &       &       \\
 % \midrule
@@ -963,7 +971,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrrr|rrrrrr|rrrrrr}
 % \toprule
 % {} & \multicolumn{6}{c|}{Time} & \multicolumn{6}{c|}{Score} & \multicolumn{6}{c}{Memory} \\
-% Method & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &   {\sc Imm} &  {\sc Skim} &   {\sc Ssa} \\
+% Method & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &   {\sc Ripples} &  {\sc Skim} &   {\sc Ssa} \\
 % R &        256 &    512 &     0.2 &     0.5 &   64-64 &     0.1 &         256 &         512 &     0.2 &     0.5 &   64-64 &     0.1 &        256 &    512 &   0.2 &   0.5 & 64-64 &   0.1 \\
 % Dataset                 &            &        &         &         &         &         &             &             &         &         &         &         &            &        &       &       &       &       \\
 % \midrule
@@ -995,7 +1003,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & \multicolumn{2}{c}{{\sc \acro}} &   {\sc Tim+} &     {\sc Imm} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Imm} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &   {\sc Imm} &   {\sc Ssa} \\
+% Method & \multicolumn{2}{c}{{\sc \acro}} &   {\sc Tim+} &     {\sc Ripples} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Ripples} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &   {\sc Ripples} &   {\sc Ssa} \\
 % R &        256 &    512 &    0.2 &     0.5 &     0.1 &         256 &         512 &     0.2 &     0.5 &     0.1 &        256 &    512 &   0.2 &   0.5 &   0.1 \\
 % Dataset                 &            &        &        &         &         &             &             &         &         &         &            &        &       &       &       \\
 % \midrule
@@ -1028,7 +1036,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & \multicolumn{2}{c}{{\sc \acro}} &   {\sc Tim+} &     {\sc Imm} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Imm} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &   {\sc Imm} &   {\sc Ssa} \\
+% Method & \multicolumn{2}{c}{{\sc \acro}} &   {\sc Tim+} &     {\sc Ripples} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &    {\sc Tim+} &     {\sc Ripples} &     {\sc Ssa} & \multicolumn{2}{c}{{\sc \acro}} &  {\sc Tim+} &   {\sc Ripples} &   {\sc Ssa} \\
 % R &        256 &    512 &    0.2 &     0.5 &     0.1 &         256 &         512 &     0.2 &     0.5 &     0.1 &        256 &    512 &   0.2 &   0.5 &   0.1 \\
 % Dataset                 &            &        &        &         &         &             &             &         &         &         &            &        &       &       &       \\
 % \midrule
@@ -1080,7 +1088,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &   {\sc Tim+} &    {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &  {\sc Imm} &   {\sc Skim} &  {\sc Ssa} \\
+% Method & {\sc \acro} &   {\sc Tim+} &    {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &  {\sc Ripples} &   {\sc Skim} &  {\sc Ssa} \\
 % Dataset                 &            &        &        &         &         &            &         &         &         &         &            &       &      &        &      \\
 % \midrule
 % \tt{Amazon0302}              &       1.99 & 295.32 &  64.45 &   12.69 &   11.40 &       96.5 &  1.047x &  1.021x &  0.571x &  1.014x &       0.09 & 45.03 & 1.01 &   1.51 & 1.35 \\
@@ -1111,7 +1119,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &    {\sc Tim+} &    {\sc Imm} &    {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Imm} &  {\sc Skim} &   {\sc Ssa} \\
+% Method & {\sc \acro} &    {\sc Tim+} &    {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Ripples} &  {\sc Skim} &   {\sc Ssa} \\
 % Dataset                 &            &         &        &         &         &             &         &         &         &         &            &       &       &       &       \\
 % \midrule
 % \tt{Amazon0302}              &       1.28 &  211.25 &  52.76 &   12.48 &    7.33 &       153.3 &  1.034x &  1.001x &  0.402x &  1.014x &       0.09 & 35.22 &  0.67 &  1.43 &  0.70 \\
@@ -1142,7 +1150,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Imm} &  {\sc Skim} &   {\sc Ssa} \\
+% Method & {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Ripples} &  {\sc Skim} &   {\sc Ssa} \\
 % Dataset                 &            &         &         &         &         &             &         &         &         &         &            &       &       &       &       \\
 % \midrule
 % \tt{Amazon0302}              &       1.92 &  297.11 &   46.78 &    4.86 &    6.65 &     12387.2 &  1.006x &  0.985x &  0.823x &  0.953x &       0.09 & 11.26 &  0.37 &  0.54 &  0.20 \\
@@ -1173,7 +1181,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &   {\sc Tim+} &     {\sc Imm} & {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Imm} & {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Imm} & {\sc Skim} &   {\sc Ssa} \\
+% Method & {\sc \acro} &   {\sc Tim+} &     {\sc Ripples} & {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} & {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Ripples} & {\sc Skim} &   {\sc Ssa} \\
 % Dataset                 &            &        &         &      &         &             &         &         &      &         &            &       &       &      &       \\
 % \midrule
 % \tt{Amazon0302}              &       1.39 &  27.01 &   43.25 &    - &    1.18 &      1151.8 &  1.020x &  1.007x &    - &  0.973x &       0.09 &  2.71 &  0.26 &    - &  0.09 \\
@@ -1204,7 +1212,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &   {\sc Tim+} &     {\sc Imm} & {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Imm} & {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Imm} & {\sc Skim} &   {\sc Ssa} \\
+% Method & {\sc \acro} &   {\sc Tim+} &     {\sc Ripples} & {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} & {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Ripples} & {\sc Skim} &   {\sc Ssa} \\
 % Dataset                 &            &        &         &      &         &             &         &         &      &         &            &       &       &      &       \\
 % \midrule
 % \tt{Amazon0302}              &       1.38 &  24.34 &   43.84 &    - &    1.16 &      1129.6 &  1.004x &  0.991x &    - &  0.969x &       0.09 &  2.74 &  0.27 &    - &  0.09 \\
@@ -1258,7 +1266,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &   {\sc Tim+} &    {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &  {\sc Imm} &   {\sc Skim} &  {\sc Ssa} \\
+% Method & {\sc \acro} &   {\sc Tim+} &    {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &  {\sc Ripples} &   {\sc Skim} &  {\sc Ssa} \\
 % Dataset                 &            &        &        &         &         &            &         &         &         &         &            &       &      &        &      \\
 % \midrule
 % \tt{Amazon0302}              &       4.07 & 295.32 &  64.45 &   12.69 &   11.40 &       99.1 &  1.019x &  0.994x &  0.557x &  0.988x &       0.16 & 45.03 & 1.01 &   1.51 & 1.35 \\
@@ -1289,7 +1297,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &    {\sc Tim+} &    {\sc Imm} &    {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Imm} &  {\sc Skim} &   {\sc Ssa} \\
+% Method & {\sc \acro} &    {\sc Tim+} &    {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Ripples} &  {\sc Skim} &   {\sc Ssa} \\
 % Dataset                 &            &         &        &         &         &             &         &         &         &         &            &       &       &       &       \\
 % \midrule
 % \tt{Amazon0302}              &       2.27 &  211.25 &  52.76 &   12.48 &    7.33 &       157.2 &  1.008x &  0.976x &  0.392x &  0.989x &       0.16 & 35.22 &  0.67 &  1.43 &  0.70 \\
@@ -1320,7 +1328,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Imm} &  {\sc Skim} &   {\sc Ssa} \\
+% Method & {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Ripples} &  {\sc Skim} &   {\sc Ssa} \\
 % Dataset                 &            &         &         &         &         &             &         &         &         &         &            &       &       &       &       \\
 % \midrule
 % \tt{Amazon0302}              &       2.47 &  297.11 &   46.78 &    4.86 &    6.65 &     12524.4 &  0.995x &  0.974x &  0.814x &  0.943x &       0.16 & 11.26 &  0.37 &  0.54 &  0.20 \\
@@ -1351,7 +1359,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &   {\sc Tim+} &     {\sc Imm} & {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Imm} & {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Imm} & {\sc Skim} &   {\sc Ssa} \\
+% Method & {\sc \acro} &   {\sc Tim+} &     {\sc Ripples} & {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} & {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Ripples} & {\sc Skim} &   {\sc Ssa} \\
 % Dataset                 &            &        &         &      &         &             &         &         &      &         &            &       &       &      &       \\
 % \midrule
 % \tt{Amazon0302}              &       1.52 &  27.01 &   43.25 &    - &    1.18 &      1157.1 &  1.016x &  1.002x &    - &  0.969x &       0.16 &  2.71 &  0.26 &    - &  0.09 \\
@@ -1382,7 +1390,7 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 % \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 % \toprule
 % {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-% Method & {\sc \acro} &   {\sc Tim+} &     {\sc Imm} & {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Imm} & {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Imm} & {\sc Skim} &   {\sc Ssa} \\
+% Method & {\sc \acro} &   {\sc Tim+} &     {\sc Ripples} & {\sc Skim} &     {\sc Ssa} &  {\sc \acro} &    {\sc Tim+} &     {\sc Ripples} & {\sc Skim} &     {\sc Ssa} & {\sc \acro} &  {\sc Tim+} &   {\sc Ripples} & {\sc Skim} &   {\sc Ssa} \\
 % Dataset                 &            &        &         &      &         &             &         &         &      &         &            &       &       &      &       \\
 % \midrule
 % \tt{Amazon0302}              &       1.26 &  24.34 &   43.84 &    - &    1.16 &      1128.5 &  1.005x &  0.991x &    - &  0.970x &       0.16 &  2.74 &  0.27 &    - &  0.09 \\
@@ -1408,25 +1416,25 @@ We have used $\epsilon = 0.5$ as suggested in the original paper, where $\epsilo
 
 \subsection{Comparing \acro with State-of-the-Art}
 To compare the run time, memory use, and quality of \acro with those of the state-of-the-art, %As explained above, the parameters of the experimented methods are hard to compare directly. It is infeasible to find precisely the corresponding parameter between any two methods in this setting. For that reason, we have used the parameters suggested by the paper.
-we perform experiments using the following parameters controlling the quality of the seed sets: {\sc Tim+} ($\epsilon=0.2$), {\sc Imm} ($\epsilon=0.5$), {\sc Skim} ($l=64,k=64$), and {\sc Ssa}($\epsilon=0.1$). 
-In fact, one of the drawbacks of \acro is that it does not have a direct control over the approximation factor, whereas {\sc Tim+} and {\sc Imm} have one. Still, \acro can control the quality indirectly by tuning the number of Monte-Carlo simulations ${\cal J}$ which also increases the number of sketches used per vertex. In the experiments, we have used ${\cal J} = 256$ for \acro. In addition, as explained in the previous section, we use a global error threshold $\epsilon_{g} = 0.01$, a local error threshold as $\epsilon_l=0.3$, and the early-exit ratio as $\epsilon_{c}=0.02$.\looseness=-1 
+we perform experiments using the following parameters controlling the quality of the seed sets: {\sc Tim+} ($\epsilon=0.2$), {\sc Ripples} ($\epsilon=0.5$), {\sc Skim} ($l=64,k=64$), and {\sc Ssa}($\epsilon=0.1$). 
+In fact, one of the drawbacks of \acro is that it does not have a direct control over the approximation factor, whereas {\sc Tim+} and {\sc Ripples} have one. Still, \acro can control the quality indirectly by tuning the number of Monte-Carlo simulations ${\cal J}$ which also increases the number of sketches used per vertex. In the experiments, we have used ${\cal J} = 256$ for \acro. In addition, as explained in the previous section, we use a global error threshold $\epsilon_{g} = 0.01$, a local error threshold as $\epsilon_l=0.3$, and the early-exit ratio as $\epsilon_{c}=0.02$.\looseness=-1 
 
 We present the results in Tables~\ref{tab:timings0.005},~\ref{tab:timings0.01},~\ref{tab:timings0.1},~\ref{tab:timingsN0.05} and \ref{tab:timingsU0.1}  for constant edge weights $w = 0.005$, $0.01$, $0.1$, normally distributed edge weights $w \in N(0.05,0.025)$ and uniformly distributed $w \in U(0,0.1)$, respectively. The top part of each table shows the  results for the networks, and the bottom four rows are the arithmetic mean, geometric mean, maximum and minimum, respectively, of the scores after they are normalized w.r.t. those of \acro's scores. In all tables, for the execution time and memory columns, lower values are better. For the influence score columns, higher values are better. 
 
 
 \begin{table*}
 
-    \setlength{\tabcolsep}{1.2pt}
+    \setlength{\tabcolsep}{1.5pt}
         \caption{Execution times~(in secs), influence scores, and memory use~(in GBs) with $K = 50$ seeds,  $\tau=16$ threads, and $w=0.005$. Influence scores are given relative to \acro{}. The runs that did not finish in 5 hours or due to high memory use shown as "-".
         }
         \label{tab:timings0.005}
         \centering
-        \resizebox{\resultsize\linewidth}{!}{
+        \resizebox{0.75\linewidth}{!}{
     
 \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 \toprule
 {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-Method & {\sc Hyp.} &   {\sc Tim+} &    {\sc Imm} &    {\sc Skim} &     {\sc Ssa} &  {\sc Hyp.}   &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & {\sc Hyp.}  &  {\sc Tim+} &  {\sc Imm} &   {\sc Skim} &  {\sc Ssa} \\
+Method & {\sc Hyp.} &   {\sc Tim+} &    {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} &  {\sc Hyp.}   &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & {\sc Hyp.}  &  {\sc Tim+} &  {\sc Ripples} &   {\sc Skim} &  {\sc Ssa} \\
 Dataset                 &   {\sc Fus.}         &        &        &         &         & {\sc Fus.}           &         &         &         &      &      {\sc Fus.}         &       &      &        &      \\
 \midrule
 \tt{Amazon0302}              &       2.0 & 295.3 &  64.5 &   12.7 &   11.4 &       96.5 &  1.047$\times$ &  1.021$\times$ &  0.571$\times$ &  1.014$\times$ &       0.09 & 45.03 & 1.01 &   1.51 & 1.35 \\
@@ -1457,12 +1465,12 @@ Geo. Mean&1.0$\times$&26.8$\times$&14.6$\times$&1.8$\times$&1.7$\times$&1.00$\ti
         }
         \label{tab:timings0.01}
         \centering
-        \resizebox{\resultsize\linewidth}{!}{
+        \resizebox{0.75\linewidth}{!}{
     
 \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 \toprule
 {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-Method & \acrotwo &    {\sc Tim+} &    {\sc Imm} &    {\sc Skim} &     {\sc Ssa} &  \acrotwo &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & \acrotwo &  {\sc Tim+} &   {\sc Imm} &  {\sc Skim} &   {\sc Ssa} \\
+Method & \acrotwo &    {\sc Tim+} &    {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} &  \acrotwo &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & \acrotwo &  {\sc Tim+} &   {\sc Ripples} &  {\sc Skim} &   {\sc Ssa} \\
 Dataset                 &            &         &        &         &         &             &         &         &         &         &            &       &       &       &       \\
 \midrule
 \tt{Amazon0302}              &       1.2 &  211.2 &  52.7 &   12.4 &    7.3 &       153.3 &  1.034$\times$ &  1.001$\times$ &  0.402$\times$ &  1.014$\times$ &       0.09 & 35.22 &  0.67 &  1.43 &  0.70 \\
@@ -1494,12 +1502,12 @@ Geo. Mean&1.0$\times$&34.1$\times$&13.3$\times$&1.4$\times$&2.6$\times$&1.00$\ti
         }
         \label{tab:timings0.1}
         \centering
-        \resizebox{\resultsize\linewidth}{!}{
+        \resizebox{0.75\linewidth}{!}{
     
 \begin{tabular}{l|rrrrr|rrrrr|rrrrr}
 \toprule
 {} & \multicolumn{5}{c|}{Time} & \multicolumn{5}{c|}{Score} & \multicolumn{5}{c}{Memory} \\
-Method & \acrotwo &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} &  \acrotwo &    {\sc Tim+} &     {\sc Imm} &    {\sc Skim} &     {\sc Ssa} & \acrotwo &  {\sc Tim+} &   {\sc Imm} &  {\sc Skim} &   {\sc Ssa} \\
+Method & \acrotwo &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} &  \acrotwo &    {\sc Tim+} &     {\sc Ripples} &    {\sc Skim} &     {\sc Ssa} & \acrotwo &  {\sc Tim+} &   {\sc Ripples} &  {\sc Skim} &   {\sc Ssa} \\
 Dataset                 &            &         &         &         &         &             &         &         &         &         &            &       &       &       &       \\
 \midrule
 \tt{Amazon0302}              &       1.9 &  297.1 &   46.8 &    4.9 &    6.7 &     12387.2 &  1.006x &  0.985x &  0.823x &  0.953x &       0.09 & 11.26 &  0.37 &  0.54 &  0.20 \\
@@ -1540,12 +1548,12 @@ Geo. Mean&1.0x&1110.5x&53.8x&7.2x&61.5x&1.00x&1.00x&1.00x&0.98x&0.99x&1.00x&456.
         }
         \label{tab:timingsN0.05}
         \centering
-        \resizebox{\resultsize\linewidth}{!}{
+        \resizebox{0.75\linewidth}{!}{
     
 \begin{tabular}{l|rrrr|rrrr|rrrr}
 \toprule
 {} & \multicolumn{4}{c|}{Time} & \multicolumn{4}{c|}{Score} & \multicolumn{4}{c}{Memory} \\
-Method & \acrotwo &   {\sc Tim+} &     {\sc Imm} &     {\sc Ssa} &  \acrotwo &    {\sc Tim+} &     {\sc Imm} &     {\sc Ssa} & \acrotwo &  {\sc Tim+} &   {\sc Imm} &   {\sc Ssa} \\
+Method & \acrotwo &   {\sc Tim+} &     {\sc Ripples} &     {\sc Ssa} &  \acrotwo &    {\sc Tim+} &     {\sc Ripples} &     {\sc Ssa} & \acrotwo &  {\sc Tim+} &   {\sc Ripples} &   {\sc Ssa} \\
 Dataset                 &            &        &         &         &             &         &         &         &            &       &       &       \\
 \midrule
 \tt{Amazon0302}              &       1.4 &  27.0 &   43.3 &    1.2 &      1151.8 &  1.020x &  1.007x &  0.973x &       0.09 &  2.71 &  0.26 &  0.09 \\
@@ -1585,12 +1593,12 @@ Geo. Mean&1.0x&279.3x&40.2x&21.1x&1.00x&1.01x&1.00x&0.99x&1.00x&175.72x&9.04x&6.
         }
         \label{tab:timingsU0.1}
         \centering
-        \resizebox{\resultsize\linewidth}{!}{
+        \resizebox{0.75\linewidth}{!}{
     
 \begin{tabular}{l|rrrr|rrrr|rrrr}
 \toprule
 {} & \multicolumn{4}{c|}{Time} & \multicolumn{4}{c|}{Score} & \multicolumn{4}{c}{Memory} \\
-Method & \acrotwo &   {\sc Tim+} &     {\sc Imm} &     {\sc Ssa} &  \acrotwo &    {\sc Tim+} &     {\sc Imm} &     {\sc Ssa} & \acrotwo &  {\sc Tim+} &   {\sc Imm} &   {\sc Ssa} \\
+Method & \acrotwo &   {\sc Tim+} &     {\sc Ripples} &     {\sc Ssa} &  \acrotwo &    {\sc Tim+} &     {\sc Ripples} &     {\sc Ssa} & \acrotwo &  {\sc Tim+} &   {\sc Ripples} &   {\sc Ssa} \\
 Dataset                 &            &        &         &         &             &         &         &         &            &       &       &       \\
 \midrule
 \tt{Amazon0302}              &       1.4 &  24.3 &   43.9 &    1.2 &      1129.6 &  1.004x &  0.991x &  0.969x &       0.09 &  2.74 &  0.27 &  0.09 \\
@@ -1620,25 +1628,25 @@ Geo. Mean&1.0x&289.5x&41.1x&21.8x&1.00x&1.00x&0.99x&0.99x&1.00x&172.40x&9.00x&6.
 
 % We note that the points missing are the runs that were unable to finished due to high memory use and killed by {\sc Out-Of-Memory Killer}.
 
-% The tables show that for small and relatively sparser graphs such as {\tt NetHep}, {\tt NetPhy}, {\tt DBLP} and {\tt Amazon}, {\sc Tim+}, the high-quality baseline, has $0.1\%$--$7\%$ more influence score compared to the proposed approach. Except {\tt DBLP}, the other sketch-based algorithm, {\sc Skim} also performs bad on these graphs. For {\tt NetPhy}, {\tt NetHEP}, and {\tt Amazon}, its influence scores are $10\%$--$44\%$ worse that those of \acro{}.  For the rest of the graphs, {\sc Tim+} is only up to $3\%$, $0.9\%$ and $0.1\%$ better in terms of influence for the edge weights $w = 0.005$, $0.01$, and $0.1$, respectively,  while being $69\times$, $167\times$, and $2624\times$ slower on average over all the graphs. It is clear that \acro{}'s influence performance is getting closer to that of {\sc Tim+} when $w$ increases. Indeed, when $w$ is small, e.g., $0.005$, it may have a hard time while catching potential influence paths; the probability an edge being captured is $1-(1-0.005)^{256}=0.72$. Using $\epsilon = 0.3$, {\sc Tim+} does not suffer from sparsity, but as the tables show, {\sc Skim} can suffer more. With respect to the execution-time performance, \acro is superior to other methods; for instance, when $w = 0.01$, it is $167\times$, $10\times$, and $10\times$ faster on average compared to {\sc Tim+}, {\sc Imm}, and {\sc Skim}, respectively. Although {\sc Imm} and {\sc Skim} look similar for $w = 0.01$ in terms of relative average execution time performance, for large graphs, {\sc Skim} is faster than  {\sc Imm}. When $w = 0.01$, the maximum execution times for $4148$, $1870$, and $114$ seconds for {\sc Tim+}, {\sc Imm}, and {\sc Skim}, respectively. For the proposed approach and with the same $w$, the maximum time spent is only $42$ seconds. 
+% The tables show that for small and relatively sparser graphs such as {\tt NetHep}, {\tt NetPhy}, {\tt DBLP} and {\tt Amazon}, {\sc Tim+}, the high-quality baseline, has $0.1\%$--$7\%$ more influence score compared to the proposed approach. Except {\tt DBLP}, the other sketch-based algorithm, {\sc Skim} also performs bad on these graphs. For {\tt NetPhy}, {\tt NetHEP}, and {\tt Amazon}, its influence scores are $10\%$--$44\%$ worse that those of \acro{}.  For the rest of the graphs, {\sc Tim+} is only up to $3\%$, $0.9\%$ and $0.1\%$ better in terms of influence for the edge weights $w = 0.005$, $0.01$, and $0.1$, respectively,  while being $69\times$, $167\times$, and $2624\times$ slower on average over all the graphs. It is clear that \acro{}'s influence performance is getting closer to that of {\sc Tim+} when $w$ increases. Indeed, when $w$ is small, e.g., $0.005$, it may have a hard time while catching potential influence paths; the probability an edge being captured is $1-(1-0.005)^{256}=0.72$. Using $\epsilon = 0.3$, {\sc Tim+} does not suffer from sparsity, but as the tables show, {\sc Skim} can suffer more. With respect to the execution-time performance, \acro is superior to other methods; for instance, when $w = 0.01$, it is $167\times$, $10\times$, and $10\times$ faster on average compared to {\sc Tim+}, {\sc Ripples}, and {\sc Skim}, respectively. Although {\sc Ripples} and {\sc Skim} look similar for $w = 0.01$ in terms of relative average execution time performance, for large graphs, {\sc Skim} is faster than  {\sc Ripples}. When $w = 0.01$, the maximum execution times for $4148$, $1870$, and $114$ seconds for {\sc Tim+}, {\sc Ripples}, and {\sc Skim}, respectively. For the proposed approach and with the same $w$, the maximum time spent is only $42$ seconds. 
 %The performance gap also narrows between \acro and {\sc Skim}, \acro only $30\%$ faster in small $w$. In the same setting, {\sc Tim+}  takes 1.5 hours for {\tt LiveJournal}, could not finish {\tt Orkut}; crashing after consuming all memory available. 
 %For $w=0.1$, \acro is much faster than all other methods and still provides high-quality results. While all methods are struggling with problem size, \acro converge results much faster, even faster than previous experiment settings.
 
 \acro{}'s memory consumption is less compared to those of others. Furthermore, it stays the same for all experimental settings with different $w$ values. This is partly due to fused sampling; the memory consumption is linearly dependent only on the number of vertices in $G$. Both sketch-registers and {\em visited} information are stored per vertex. Hence, \acro's memory consumption stays constant for any simulation parameters or any number of edges. That is given ${\cal J}$, \acro's memory use is predictable for any graph. On the other hand, the other methods' memory consumption tend to increase with $w$, and their behaviours change with different parameters and graphs. 
 
 Overall, the performance characteristics of the proposed algorithm are  different from its state-of-the-art competitors. \acro's performance is highly affected by $G$'s diameter. %Indeed, we observe highly varying performance speed-up results in the Tables \ref{tab:timings005}-\ref{tab:timings1}. 
-For instance, for {\tt Pokec} with $w = 0.01$, the average diameter of the samples is 43, which makes \acro to lose its edge against its fastest competitor. On the other hand, with $w = 0.1$, the average diameter is only around 17, and \acro is six times faster than its nearest competitor. Indeed, its execution time decreases as the samples and the influence graph $G$ get denser. On the other hand, the other methods tend to get relatively slower under these changes. For instance, when the influence probability increases from $w = 0.005$ to $w = 0.01$, the average speedups of \acro over the baselines, i.e., {\sc Tim+}, {\sc Imm}, {\sc Skim}, and {\sc Ssa}, increase by 29$\times$, 3.1$\times$,  3.8$\times$, and 27$\times$, respectively.
+For instance, for {\tt Pokec} with $w = 0.01$, the average diameter of the samples is 43, which makes \acro to lose its edge against its fastest competitor. On the other hand, with $w = 0.1$, the average diameter is only around 17, and \acro is six times faster than its nearest competitor. Indeed, its execution time decreases as the samples and the influence graph $G$ get denser. On the other hand, the other methods tend to get relatively slower under these changes. For instance, when the influence probability increases from $w = 0.005$ to $w = 0.01$, the average speedups of \acro over the baselines, i.e., {\sc Tim+}, {\sc Ripples}, {\sc Skim}, and {\sc Ssa}, increase by 29$\times$, 3.1$\times$,  3.8$\times$, and 27$\times$, respectively.
 
  \begin{figure}[!ht] 
      \centering
      \includegraphics[width=1\linewidth]{images/speedup-imm}
-   \centering \caption{Speed-up achieved by \acro{}~(${\cal J} = 256$) over {\sc Imm}~($\epsilon\myeq 0.5$) using $\tau=16$ threads.
+   \centering \caption{Speed-up achieved by \acro{}~(${\cal J} = 256$) over {\sc Ripples}~($\epsilon\myeq 0.5$) using $\tau=16$ threads.
      \label{fig:vs-imm}} 
  \end{figure}
 
 In terms of influence scores, as expected, the average influence probability seems to have a significant impact on the expected number of influenced vertices. For $w \in \{0.005, 0.01, 0.1\}$ this is clear; for instance, on the graph {\tt LiveJournal}, the influences obtained by \acro{} are 5892, 48182, and 1698955, respectively. The uniform and normal distribution with mean $w_{mean} = 0.05$ also generate influence values in between the ones generated for $w = 0.01$ and $w = 0.1$. On the other hand, the changes on the influence vary for different graph; for instance, when $w$ is increased from $0.01$ to $0.1$, for {\tt Slashdot} graphs, the influence increases from around $1200$ to $24000$, whereas it increases from around 1850 to 775000 for {\tt Pokec}.
 
-Figure~\ref{fig:vs-imm} shows the speedups of \acro over {\sc Imm} for all the graphs and all $w$ values. As described above, the relatively sparser setting $w=0.005$ is especially challenging due to the high diameter of the influence graph and low vector unit utilization. Even with this $w$ value, \acro{} is only slower by a few seconds and only when the influence is small. For larger graphs with larger influences \acro{} is much faster than {\sc Imm}. As explained before, for larger $w$, \acro{}'s execution-time performance is usually better, and its influence quality is on par with that of {\sc Imm}.
+Figure~\ref{fig:vs-imm} shows the speedups of \acro over {\sc Ripples} for all the graphs and all $w$ values. As described above, the relatively sparser setting $w=0.005$ is especially challenging due to the high diameter of the influence graph and low vector unit utilization. Even with this $w$ value, \acro{} is only slower by a few seconds and only when the influence is small. For larger graphs with larger influences \acro{} is much faster than {\sc Ripples}. As explained before, for larger $w$, \acro{}'s execution-time performance is usually better, and its influence quality is on par with that of {\sc Ripples}.
  \begin{figure}[!ht] 
      \centering
      \includegraphics[width=1\linewidth]{images/speedup-skim}
@@ -1690,7 +1698,7 @@ A popular method for sketch-based IM is {\sc Skim}~\cite{cohen2014sketch} by Coh
  
 % \fixme{The Independent Path Algorithm~(IPA)~\cite{IPA} by Kim~et~al. runs a proxy model and prunes paths with probabilities} smaller \fixme{than a given threshold} in parallel. \fixme{The approach only keeps a dense but small part of the network and scalable to only sparse networks. Liu~et~al. proposed IMGPU~\cite{IMGPU}, an IM estimation method by utilizing a bottom-up traversal algorithm. It performs a single Monte-Carlo simulation on many GPU threads to find the reachability of the seed set. It is $5.1\times$ faster than {\sc MixGreedy} on a CPU. The GPU implementation is up to $60\times$ faster with an average speedup of  $24.8\times$. }
 
-% \fixme{Borgs~et~al.~\cite{borgs2014maximizing} proposed Reverse Influence Sampling~(RIS) which samples a fraction of all random reverse reachable sets. The number of necessary samples to find the seed set is calculated based on the number of visited vertices. The algorithm has an approximation guarantee of $(1-1/e-\epsilon)$. Minutoli et al. improved RIS and proposed {\sc Imm} that works on multi-threaded and distributed architectures~\cite{minutoli2019fast} with high efficiency. Recently, the authors extended the algorithm to work in a multi-GPU setting~\cite{curipples}.}
+% \fixme{Borgs~et~al.~\cite{borgs2014maximizing} proposed Reverse Influence Sampling~(RIS) which samples a fraction of all random reverse reachable sets. The number of necessary samples to find the seed set is calculated based on the number of visited vertices. The algorithm has an approximation guarantee of $(1-1/e-\epsilon)$. Minutoli et al. improved RIS and proposed {\sc Ripples} that works on multi-threaded and distributed architectures~\cite{minutoli2019fast} with high efficiency. Recently, the authors extended the algorithm to work in a multi-GPU setting~\cite{curipples}.}
 
 Two-phased Influence Maximization~({\sc Tim+}) borrows ideas from RIS but overcomes its limitations with a novel algorithm~\cite{tim}. Its first phase computes a lower bound of the maximum expected influence over all size-$K$ node sets. It then uses this bound to derive a parameter $\theta$. In the second phase, it samples $\theta$ random RR sets from $G$, and then derives a size-$K$ node-set that covers a large number of RR sets.
 
@@ -1706,7 +1714,7 @@ Kumar and Calders~\cite{kumar2017information} proposed the Time Constrained Info
 In this work, we propose a sketch-based Influence Maximization algorithm that employs fused sampling and a novel error-adaptive rebuilding strategy. We provide a fast implementation of the algorithm that utilizes multi-threading to exploit multiple cores. Also, we present a performance comparison with state-of-the-art IM algorithms on real-world datasets and show that \acro{} can be an order of magnitude faster while obtaining the same influence. 
 %With the proposed method, \acro can achieve $\maxspeedupSKIM\times$ speedup against a sketch-based algorithm {\sc Skim} and $\maxspeedupIMM\times$ speedup against an approximation-based algorithm {\sc Imm} while producing high-quality seed sets. 
 %\ggx{Bu kısım değişmeli}
-In the future, we will extend our work to a distributed GPGPU setting to process graphs with billions of vertices and edges under a minute. 
+In the future, we will extend our work to a distributed GPU setting to process graphs with billions of vertices and edges under a minute. 
 %The main issue with \acro on such an architecture is the broadcast of sketch registers. When the vertices are partitioned into different computation units, resulting sketch updates should be communicated to all partitions. To overcome the issue and reduce communication bottlenecks, graph preprocessing and speculative diffusion strategies will be employed.
 
 
