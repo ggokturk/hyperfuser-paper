@@ -1,106 +1,29 @@
-% \documentclass[10pt,journal,compsoc]{IEEEtran}
-% \usepackage{subfiles}
-% \usepackage{url}
-% \usepackage{amsmath}
-% \usepackage{xspace}
-% \usepackage{multirow}
-% \usepackage{amssymb}
-% \usepackage{algorithm}
-% \usepackage{subfig}
-% \usepackage[noend]{algpseudocode}
-% \renewcommand{\algorithmicrequire}{\textbf{Input:~}}
-% \renewcommand{\algorithmicensure}{\textbf{Output:~}}
-% \newcommand\ovr[1]{\overrightarrow{#1}}
-% \newcommand\myeq{\mkern1.5mu{=}\mkern1.5mu}
-% \usepackage{booktabs}
-% \usepackage{array}
-% \usepackage{color}
-% \usepackage{listings}
-% \usepackage{placeins}
-% \usepackage{enumitem}
-% \usepackage{balance}
-% \usepackage{etoolbox}
-% \usepackage{lineno,hyperref}
-% \newcommand\acrotwo{
-% \multirow{2}{*}{ \shortstack{ \sc{Hyp.}\\\sc{Fus.}} }
-% }
-% \renewcommand{\toprule}{}
-% \newcommand\acro{{\sc{HyperFuseR\xspace}\xspace}\xspace}
-% \newcommand\kktodo[1]{\textcolor{red}{#1}}
-% \newcommand\fixme[1]{\textcolor{red}{#1}}
-% \newcommand\minspeedup{{{3.5\xspace}\xspace}\xspace}
-% \newcommand\maxspeedup{{{11\xspace}\xspace}\xspace}
-% \newcommand\maxspeedupTIM{{{1500\xspace}\xspace}\xspace}
-% \newcommand\maxspeedupIMM{{{27.87\xspace}\xspace}\xspace}
-% \newcommand\maxspeedupSKIM{{{11\xspace}\xspace}\xspace}
+\documentclass[review]{elsarticle}
+\usepackage{etoolbox}
+\usepackage{lineno,hyperref}
+\let\oldbibliography\thebibliography
+\renewcommand{\thebibliography}[1]{%
+  \oldbibliography{#1}%
+  \setlength{\itemsep}{0pt}%
+}
 
-% \let\oldbibliography\thebibliography
-% \renewcommand{\thebibliography}[1]{%
-%   \oldbibliography{#1}%
-%   \setlength{\itemsep}{0pt}%
-% }
+\modulolinenumbers[5]
 
-% \modulolinenumbers[5]
-
-% \renewcommand{\floatpagefraction}{.98}
-% % \journal{Journal of Parallel and Distributed Computing}
+\renewcommand{\floatpagefraction}{.98}
+\journal{Expert Systems With Applications}
 
 % %% `Elsevier LaTeX' style
-% \bibliographystyle{elsarticle-num}
+\bibliographystyle{elsarticle-num}
 % %%%%%%%%%%%%%%%%%%%%%%%
-
-% \begin{document}
-
-% % \begin{frontmatter}
-% % \title{Fast and Error-Adaptive Influence Maximization based on Count-Distinct Sketches}%\tnoteref{t1,t2}}
-
-% % %% Group authors per affiliation:
-% % %% or include affiliations in footnotes:
-% % \author[add]{Gökhan Göktürk}
-% % % \ead{gokhan.gokturk@sabanciuniv.edu}
-
-% % \author[add]{Kamer Kaya}
-% % % \ead{kaya@sabanciuniv.edu}
-
-% % \address[add]{Faculty of Engineering and Natural Sciences, Sabancı University, Turkey}
-
-
-% % \IEEEtitleabstractindextext{%
-\documentclass[10pt,journal,compsoc]{IEEEtran}
-\makeatletter
-\long\def\@makecaption#1#2{\ifx\@captype\@IEEEtablestring%
-\footnotesize\begin{center}{\normalfont\footnotesize #1}\\
-{\normalfont\footnotesize\scshape #2}\end{center}%
-\@IEEEtablecaptionsepspace
-\else
-\@IEEEfigurecaptionsepspace
-\setbox\@tempboxa\hbox{\normalfont\footnotesize {#1.}~~ #2}%
-\ifdim \wd\@tempboxa >\hsize%
-\setbox\@tempboxa\hbox{\normalfont\footnotesize {#1.}~~ }%
-\parbox[t]{\hsize}{\normalfont\footnotesize \noindent\unhbox\@tempboxa#2}%
-\else
-\hbox to\hsize{\normalfont\footnotesize\hfil\box\@tempboxa\hfil}\fi\fi}
-\makeatother
-
-%\DeclareUnicodeCharacter{2212}{-}
-\usepackage[utf8]{inputenc}
-\ifCLASSOPTIONcompsoc
-  % The IEEE Computer Society needs nocompress option
-  % requires cite.sty v4.0 or later (November 2003)
-  \usepackage[nocompress]{cite}
-\else
-  % normal IEEE
-  \usepackage{cite}
-\fi
 
 \newcommand\myeq{\mkern1.5mu{=}\mkern1.5mu}
 
-\newcommand\MYhyperrefoptions{bookmarks=true,bookmarksnumbered=true, pdfpagemode={UseOutlines},plainpages=false,pdfpagelabels=true,
-colorlinks=true,linkcolor={black},citecolor={black},urlcolor={black},
-pdftitle={Fast and Error-Adaptive Influence Maximization based on Count-Distinct Sketches},%<!CHANGE!
-pdfsubject={Typesetting},%<!CHANGE!
-pdfauthor={G\"{o}khan G\"{o}kt\"{u}rk and Kamer Kaya},%<!CHANGE!
-pdfkeywords={Influence Maximization, Graph Processing, Graph Sampling, Fused Sampling, Memory Access Regularization}}%<^!CHANGE!
+% \newcommand\MYhyperrefoptions{bookmarks=true,bookmarksnumbered=true, pdfpagemode={UseOutlines},plainpages=false,pdfpagelabels=true,
+% colorlinks=true,linkcolor={black},citecolor={black},urlcolor={black},
+% pdftitle={Fast and Error-Adaptive Influence Maximization based on Count-Distinct Sketches},%<!CHANGE!
+% pdfsubject={Typesetting},%<!CHANGE!
+% pdfauthor={G\"{o}khan G\"{o}kt\"{u}rk and Kamer Kaya},%<!CHANGE!
+% pdfkeywords={Influence Maximization, Graph Processing, Graph Sampling, Fused Sampling, Memory Access Regularization}}%<^!CHANGE!
 
 \newcommand\rev[1]{{#1}}
 % \newcommand\rev[1]{{#1}}
@@ -112,12 +35,10 @@ pdfkeywords={Influence Maximization, Graph Processing, Graph Sampling, Fused Sam
 \usepackage{amsfonts}
 \usepackage{url}
 
-\ifCLASSINFOpdf
-  \usepackage[pdftex]{graphicx}
-  \graphicspath{{./images/}}
-  \DeclareGraphicsExtensions{.pdf,.jpeg,.png,.svg}
-\else 
-\fi
+% \usepackage[pdftex]{graphicx}
+% \graphicspath{{./images/}}
+% \DeclareGraphicsExtensions{.pdf,.jpeg,.png,.svg}
+
 \usepackage{amsmath}
 \usepackage{xspace}
 \usepackage{multirow}
@@ -157,22 +78,23 @@ pdfkeywords={Influence Maximization, Graph Processing, Graph Sampling, Fused Sam
 %  {\footnotesize Fig. \thefigure.\hspace{3pt} #1}}
 
 
-
 \begin{document}
-\title{Fast and Error-Adaptive Influence Maximization based on Count-Distinct Sketches}
-        
 
-        
-\author{G\"{o}khan~G\"{o}kt\"{u}rk
-        and~Kamer~Kaya% <-this % stops a space
-\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem G. G\"{o}kt\"{u}rk and K. Kaya are with Computer Science and Engineering, Faculty of Engineering and Natural Sciences, Sabanci University, Istanbul, Turkey.}% <-this % stops a space
-%\thanks{Manuscript received April 19, 2005; revised August 26, 2015.}}
-}
-%FIXME
-\markboth{}%
-{G\"{o}kt\"{u}rk \MakeLowercase{\textit{et al.}}: Boosting Parallel Influence-Maximization Kernels for Undirected Networks with Fusing and Vectorization}
+\begin{frontmatter}
+\title{Fast and Error-Adaptive Influence Maximization based on Count-Distinct Sketches}%\tnoteref{t1,t2}}
 
-\maketitle
+% % %% Group authors per affiliation:
+% % %% or include affiliations in footnotes:
+\author[add]{Gökhan Göktürk}
+% \ead{gokhan.gokturk@sabanciuniv.edu}
+
+\author[add]{Kamer Kaya}
+% \ead{kaya@sabanciuniv.edu}
+
+\address[add]{Faculty of Engineering and Natural Sciences, Sabancı University, Turkey}
+
+
+
 \begin{abstract}
 %     \fixme{
 Influence maximization~(IM) is the problem of finding a seed vertex set that maximizes the expected number of vertices influenced under a given diffusion model. Due to the NP-Hardness of finding an optimal seed set, approximation algorithms are frequently used for IM. 
@@ -182,10 +104,10 @@ In this work, we describe a fast, error-adaptive approach that leverages Count-D
 For a faster IM kernel, we rebuild the sketches in parallel only after observing estimation errors above a given threshold. Our experimental results show that the proposed algorithm yields comparable seed sets while being up to $3,337\times$ faster than a state-of-the-art, high-quality influence maximization algorithm. In addition, it is up to $63\times$ faster than a sketch-based approach while producing seed sets with $2\%$--$10\%$ better influence scores.
 \end{abstract}
 % } 
-% \begin{keyword}
-% Influence Maximization, Graph Processing, Graph Sampling, Fused Sampling, Memory Access Regularization, Count-Distinct Sketch
-% \end{keyword}
-% \end{frontmatter}
+\begin{keyword}
+Influence Maximization, Graph Processing, Graph Sampling, Fused Sampling, Memory Access Regularization, Count-Distinct Sketch
+\end{keyword}
+\end{frontmatter}
 
 
 \section{Introduction}
@@ -285,7 +207,7 @@ Simulating a greedy algorithm in \fixme{parallel} is a \fixme{straightforward} w
 
 Influence Maximization aims to find a seed set $S \subseteq V$ among \fixme{all possible size $K$ subsets of $V$ that maximizes an {\em influence spread function} $\sigma$  when the diffusion process is initiated from $S$.} %Although we focus on graphs with bidirectional edges, for IM, the edges can be unidirectional depending on the initial construction. That is although the edges $\{u, v\} \in E$ are assumed to be bidirectional, throughout the diffusion process, we use $(u, v)$~($(v, u)$) as the edge that may be used to influence/activate $v$~($u$) given that $u$~($v$) has already been influenced/activated. This being said, $w_{u,v}$ can be set to zero to make the edge $(v, u)$ practically unidirectional. 
 In the literature, {\em independent} and {\em weighted cascade}~(IC and WC), and 
-{\em linear threshold}~(LT)~\cite{kempe2003maximizing} are three widely recognized diffusion models for IM. 
+{\em linear threshold}~(LT)~\cite{kempe2003maximizing} are three widely recognized diffusion models for IM.
 
 % \begin{figure}[!ht] 
 %     \centering
@@ -302,7 +224,7 @@ In the literature, {\em independent} and {\em weighted cascade}~(IC and WC), and
 %   %\label{fig_ic_model} 
 %   \label{fig:xx} 
 % \end{figure}
-
+% \FloatBarrier
 % \begin{itemize}[leftmargin=*]
 % \item The {\bf Independent Cascade} model \fixme{works in rounds and activates} a vertex $v$ in the current round if one of $v$'s \fixme{incoming edges $(u, v)$ is used during the diffusion} round, \fixme{which happens with the activation probability $w_{u, v}$, given that $u$ has already been} influenced \fixme{in the previous rounds. The activation probabilities are independent (from each other and previous activations)} in the {\em independent cascade} model, which we focus on in this paper. A toy graph with activation probabilities on the edges is shown in Figure~\ref{fig:ic}.
 % In theory, there can exist parallel and independent $\{u, v\}$ edges in $E$. In practice, they are merged to a single $\{u,v\}$ edge via preprocessing. 
@@ -322,13 +244,13 @@ In the literature, {\em independent} and {\em weighted cascade}~(IC and WC), and
 % \end{itemize}
 
 % \setlength{\columnsep}{1.2pt}%
-\begin{wrapfigure}{r}{0.35\linewidth}
-    \begin{center}
-      \includegraphics[width=1\linewidth]{images/ic.pdf}
-    \end{center}
-    \caption{\label{fig:ic}The directed graph $G = (V, E)$ for IC with independent diffusion probabilities.}
-  \end{wrapfigure}
-  The {\bf Independent Cascade} model \fixme{works in rounds and activates} a vertex $v$ in the current round if one of $v$'s \fixme{incoming edges $(u, v)$ is used during the diffusion} round, \fixme{which happens with the activation probability $w_{u, v}$, given that $u$ has already been} influenced \fixme{in the previous rounds. The activation probabilities are independent (from each other and previous activations)} in the {\em independent cascade} model, which we focus on in this paper. A toy graph with activation probabilities on the edges is shown in Figure~\ref{fig:ic}.
+% \begin{wrapfigure}{r}{0.35\linewidth}
+%     \begin{center}
+%       \includegraphics[width=1\linewidth]{images/ic.pdf}
+%     \end{center}
+%     \caption{\label{fig:ic}The directed graph $G = (V, E)$ for IC with independent diffusion probabilities.}
+%   \end{wrapfigure}
+The {\bf Independent Cascade} model \fixme{works in rounds and activates} a vertex $v$ in the current round if one of $v$'s \fixme{incoming edges $(u, v)$ is used during the diffusion} round, \fixme{which happens with the activation probability $w_{u, v}$, given that $u$ has already been} influenced \fixme{in the previous rounds. The activation probabilities are independent (from each other and previous activations)} in the {\em independent cascade} model, which we focus on in this paper. A toy graph with activation probabilities on the edges is shown in Figure~\ref{fig:ic}.
   % In theory, there can exist parallel and independent $\{u, v\}$ edges in $E$. In practice, they are merged to a single $\{u,v\}$ edge via preprocessing. 
 %As a generalization of the above-mentioned models, {\bf triggering} has also been proposed by Kempe~et~al.~\cite{kempe2003maximizing}. In this model, each neighbor has a probability to influence the vertex $v$. The diffusion process chooses a random subset of vertices called the {\em triggering set} to activate the vertices at each instance.
 The complexity analysis stays consistent for many diffusion models, including {\em Independent Cascade}, {\em Weighted Cascade}, and {\em Linear Threshold} models; the time complexity of the greedy algorithm, estimating the $\sigma$ influence score, running $R$ simulations, and selecting $K$ seed vertices is $\mathcal{O}(KRn\sigma)$ for a graph with $n$ vertices. 
@@ -510,7 +432,7 @@ The toy example in Fig.~\ref{fig:fmops} with  ${\cal J} = 4$ shows how the sketc
 
 \begin{figure}[!ht]
     \begin{center}
-    \includegraphics[width=\linewidth]{images/fmops.pdf}
+    \includegraphics[width=0.8\linewidth]{images/fmops.pdf}
     \caption{ (a) \label{fminit} Toy sketch initialization of vertex $u$ with four registers and 4-bit hash functions. (b) \label{fmmerge} Example of union operation on sketches of vertices $u$ and $v$ with four registers. (c) \label{fmwrite} Diffusion operation from vertex $v$ to vertex $u$ w.r.t. sampled subgraph. 
      }\label{fig:fmops} 
     \end{center}
@@ -639,7 +561,7 @@ Figure~\ref{fig:hyperdiff} shows a toy diffusion process on four vertices and a 
 %This is why although the reachability sets in Fig.~\ref{fig:infuserdiff} are shown for all vertices with dense vectors, the ones except that of vertex 1 are greyed out since they are not manipulated.
 \begin{figure}[!ht]
     \begin{center}
-    \includegraphics[width=0.95\linewidth]{images/sketchdiff.pdf}
+    \includegraphics[width=0.85\linewidth]{images/sketchdiff.pdf}
     \caption{\acro diffusion process illustrated for \emph{all} vertices on toy sample graph. (a)\label{hyperinit} Toy sketch initialization. (b) \label{hyperdiff1} First level of diffusion using \emph{Pull-based} method for \emph{all} vertices. (c) \label{hyperdiff2} Second level diffusion following (a); only updated vertices' sketches are pulled. 
      }\label{fig:hyperdiff} 
     \end{center}
@@ -661,7 +583,7 @@ Sketches are fast. However, each sketch operation, including update and merge, c
 \begin{figure}[!ht]
     \begin{center}
     \includegraphics[width=\linewidth]{images/sketch-saturation.pdf}
-    \caption{ Effect of register saturation on {\tt Amazon0302} dataset using \acro(${\cal J}=256$) without rebuilding against Greedy($\mathcal{R}=20000$) method\cite{kempe2003maximizing}. %\kktodo{buna TIMS'in sonuclarini da ekleyebilir miyiz - en kaliteli o diye, eger mavinin ustunde kaliyorsa guzel} \ggx{Bunun için süreye ihtiyacım var. Diğer algorithmlar mavi çizgi gibi olmalı,(SKIM hariç) 
+    \caption{ Effect of register saturation on {\tt Amazon0302} dataset using \acro(${\cal J}=256$) without rebuilding against Greedy($\mathcal{R}=20000$) method\cite{kempe2003maximizing}.
      }\label{fig:sketch-saturation} 
     \end{center}
 \end{figure}
@@ -1730,7 +1652,7 @@ This work was supported by Scientific and Technological Research Council of Turk
 
 % \bibliographystyle{IEEEtran}
 % \bibliographystyle{elsarticle-num}
-\bibliographystyle{IEEEtranS}
+% \bibliographystyle{IEEEtranS}
 % argument is your BibTeX string definitions and bibliography database(s)
 \bibliography{refs}
 % \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{./images/gokhan.png}}]{G\"{o}khan~G\"{o}kt\"{u}rk} is a PhD candidate at the Faculty of Engineering and Natural Sciences in Sabancı University. He has received his BS and MS degrees from Sabancı University as well. He is interested in High Performance Computing, Parallel Programming, and Graph Processing.
