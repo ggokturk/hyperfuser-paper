@@ -1,4 +1,5 @@
-\documentclass[review]{elsarticle}
+\documentclass[final,5p,times,twocolumn]{elsarticle}
+% \documentclass[review]{elsarticle}
 \usepackage{etoolbox}
 \usepackage{lineno,hyperref}
 \let\oldbibliography\thebibliography
@@ -74,22 +75,17 @@
 
 \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
 
-%\newcommand{\mycaption}[1]{\stepcounter{figure}\raisebox{-7pt}
-%  {\footnotesize Fig. \thefigure.\hspace{3pt} #1}}
-
 
 \begin{document}
 
 \begin{frontmatter}
 \title{Fast and Error-Adaptive Influence Maximization based on Count-Distinct Sketches}%\tnoteref{t1,t2}}
 
-% % %% Group authors per affiliation:
-% % %% or include affiliations in footnotes:
 \author[add]{Gökhan Göktürk}
-% \ead{gokhan.gokturk@sabanciuniv.edu}
+\ead{gokhan.gokturk@sabanciuniv.edu}
 
 \author[add]{Kamer Kaya}
-% \ead{kaya@sabanciuniv.edu}
+\ead{kaya@sabanciuniv.edu}
 
 \address[add]{Faculty of Engineering and Natural Sciences, Sabancı University, Turkey}
 
@@ -117,11 +113,6 @@ As the study of these networks is imperative for \fixme{educational, political, 
 Furthermore, since the diffusion analysis may be time-critical, or increasing the influence coverage may be too expensive, novel and efficient approaches to find good vertex sets that propagate the information effectively are essential.
 
 Influence maximization is the problem of finding a subset $S \subset V$ of $K$ vertices in a graph $G = (V, E)$ with the vertex set $V$ and edge set $E$ such that $S$ reaches the maximum reachability, i.e., influences the maximum expected number of vertices, under some diffusion model. Kempe et al.~\cite{kempe2003maximizing} introduced the IM problem, \fixme{proved it to be NP-hard,} and provided a greedy Monte-Carlo approach that has a \fixme{constant approximation ratio over the optimal solution}. This greedy approach is one of the most frequently applied algorithms for IM. The time complexity of the greedy algorithm, with an influence score estimate $\sigma$, running $R$ simulations, and selecting $K$ seed vertices is $\mathcal{O}(KRn\sigma)$ for a graph with $n$ vertices. Although they perform well in terms of seed-set quality, the greedy Monte-Carlo solutions are impractical for real-life networks featuring millions of vertices as a consequence of their expensive simulation costs. Due to this reason, many \fixme{heuristics and proxy methods have been proposed in the literature~\cite{MixGreedy, narayanam2010shapley, kimura2007extracting, chen2010PMIA,chen2010LDAG, kim2013scalable, cohen2014sketch, goyal2011simpath, jung2012irie,cheng2014imrank,liu2014influence,galhotra2016holistic}}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
-% However, these simulation-based, greedy algorithms provide the best possible approximation guarantees. Therefore they are considered as the gold standard for IM.  
 
 Simulating a greedy algorithm in \fixme{parallel} is a \fixme{straightforward} workaround to reduce the execution time of IM kernels and make them scalable for large-scale networks. However, for large networks, a parallel, greedy approach with a good approximation guarantee does not come cheap on networks with billions of vertices and edges even if a large number of processing units/cores are available. Following similar attempts in the literature, we propose a parallel, sketch-based approach that approximates the Monte-Carlo processes. To boost the performance, the proposed approach does not exactly count the number of influenced vertices. Instead, it leverages Count-Distinct sketches. Below is a summary of our contributions:
 
