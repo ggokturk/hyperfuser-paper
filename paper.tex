@@ -200,21 +200,21 @@ Influence Maximization aims to find a seed set $S \subseteq V$ among \fixme{all 
 In the literature, {\em independent} and {\em weighted cascade}~(IC and WC), and 
 {\em linear threshold}~(LT)~\cite{kempe2003maximizing} are three widely recognized diffusion models for IM.
 
-% \begin{figure}[!ht] 
-%     \centering
-%   \subfloat[\small{IC}\label{fig:ic}]{%
-%        \includegraphics[width=0.4\linewidth]{images/ic.pdf}}
-%   \subfloat[\small{WC}\label{fig:wc}]{%
-%         \includegraphics[width=0.4\linewidth]{images/wc.pdf}}
-%     \\% IMAGES HERE
-%   \caption{\small{\protect\subref{fig:ic} 
-% The directed graph $G = (V, E)$ for IC with independent diffusion probabilities. 
-% \protect\subref{fig:wc}
-% The directed graph for WC is obtained by setting the diffusion probabilities of incoming edges to $1 / |\Gamma^-_G(v)|$ for each vertex $v \in V$.% \kktodo{bu (4,1) kenarinin agirligi 1 degil mi?}\ggx{done.} 
-%   }}
-%   %\label{fig_ic_model} 
-%   \label{fig:xx} 
-% \end{figure}
+\begin{figure}[!ht] 
+    \centering
+  \subfloat[\small{IC}\label{fig:ic}]{%
+       \includegraphics[width=0.4\linewidth]{images/ic.pdf}}
+  \subfloat[\small{WC}\label{fig:wc}]{%
+        \includegraphics[width=0.4\linewidth]{images/wc.pdf}}
+    \\% IMAGES HERE
+  \caption{\small{\protect\subref{fig:ic} 
+The directed graph $G = (V, E)$ for IC with independent diffusion probabilities. 
+\protect\subref{fig:wc}
+The directed graph for WC is obtained by setting the diffusion probabilities of incoming edges to $1 / |\Gamma^-_G(v)|$ for each vertex $v \in V$.% \kktodo{bu (4,1) kenarinin agirligi 1 degil mi?}\ggx{done.} 
+  }}
+  %\label{fig_ic_model} 
+  \label{fig:xx} 
+\end{figure}
 % \FloatBarrier
 % \begin{itemize}[leftmargin=*]
 % \item The {\bf Independent Cascade} model \fixme{works in rounds and activates} a vertex $v$ in the current round if one of $v$'s \fixme{incoming edges $(u, v)$ is used during the diffusion} round, \fixme{which happens with the activation probability $w_{u, v}$, given that $u$ has already been} influenced \fixme{in the previous rounds. The activation probabilities are independent (from each other and previous activations)} in the {\em independent cascade} model, which we focus on in this paper. A toy graph with activation probabilities on the edges is shown in Figure~\ref{fig:ic}.
