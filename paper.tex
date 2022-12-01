@@ -117,25 +117,23 @@ Influence maximization is the problem of finding a subset $S \subset V$ of $K$ v
 Simulating a greedy algorithm in \fixme{parallel} is a \fixme{straightforward} workaround to reduce the execution time of IM kernels and make them scalable for large-scale networks. However, for large networks, a parallel, greedy approach with a good approximation guarantee does not come cheap on networks with billions of vertices and edges even if a large number of processing units/cores are available. Following similar attempts in the literature, we propose a parallel, sketch-based approach that approximates the Monte-Carlo processes. To boost the performance, the proposed approach does not exactly count the number of influenced vertices. Instead, it leverages Count-Distinct sketches. Below is a summary of our contributions:
 
 \begin{itemize} [leftmargin=0.3cm]
-\item \fixme{We propose \acro\footnote{\scriptsize{\url{https://github.com/ggokturk/infuser}}}, an open-source, blazing-fast, error-adaptive, sketch-based Influence Maximization algorithm.} The proposed scheme removes the contamination of sketches in. Error-adaptive sketch rebuilding strategy we employed lets the algorithm rebuild sketches only when necessary, allowing substantial performance gains while retaining high-quality results.  
+\item \fixme{We propose \acro\footnote{\scriptsize{\url{https://github.com/ggokturk/infuser}}}, an open-source, blazing-fast, error-adaptive, sketch-based Influence Maximization algorithm.} The proposed scheme removes the contamination of sketches in an efficient way. Error-adaptive sketch rebuilding strategy we employed lets the algorithm rebuild sketches only when necessary, allowing substantial performance gains while retaining high-quality results.  
 
-\item The edges are sampled as they are traversed across several simulations. Thus, sampling, diffusion, and count-distinct processes are fused for all simulations. 
-
-\item \fixme{Running concurrent simulations} on per-vertex Count-Distinct sketches reduces the number of memory accesses which is the main bottleneck for many graph kernels in the literature. While traversing an edge, \acro concurrently performs multiple diffusion simulations while using only a single (8-bit) value per vertex for each simulation. 
+\item The edges are sampled as they are traversed across several simulations. Thus, sampling, diffusion, and count-distinct processes are fused for all simulations. \fixme{Running concurrent simulations} on per-vertex Count-Distinct sketches reduces the number of memory accesses which is the main bottleneck for many graph kernels in the literature. While traversing an edge, \acro concurrently performs multiple diffusion simulations while using only a single (8-bit) value per vertex for each simulation. 
 
 \item \acro{} can process large-scale graphs with millions of vertices and hundreds of millions of edges under a minute without compromising the quality of results. Furthermore, the performance scales near linearly with the number of threads available. In addition, while processing a large-scale graph, only a few GBs of memory is used, where most of the memory is spent for storing the graph itself. 
 
 \item Once it is read from the memory, \acro processes all samples of a single edge together. The suggested approach, therefore, decreases the pressure on the memory subsystem. Furthermore, it employs vector compute units to its near maximum efficiency to regularize memory accesses.
 
-\item We evaluate the runtime performance, memory consumption, and influence score of sketch- and approximation-based state-of-the-art influence maximization algorithms, namely {\sc Skim}~\cite{cohen2014sketch}, {\sc SSA}~\cite{nguyen2016stop}, {\sc Tim+}~\cite{tim} and {\sc Ripples}~\cite{minutoli2019fast}, to accurately position the performance of \acro{} within the IM literature. The experiments show that \acro can be $63\times$ and $3337\times$ faster than a state-of-the-art sketch-based and high-quality approximation algorithm, respectively while reaching the influence quality of the accurate algorithms with less memory.
+\item We evaluate the run-time performance, memory consumption, and influence score of sketch- and approximation-based state-of-the-art influence maximization algorithms, namely {\sc Skim}~\cite{cohen2014sketch}, {\sc SSA}~\cite{nguyen2016stop}, {\sc Tim+}~\cite{tim} and {\sc Ripples}~\cite{minutoli2019fast}, to accurately position the performance of \acro{} within the IM literature. The experiments show that \acro can be $63\times$ and $3337\times$ faster than a state-of-the-art sketch-based and high-quality approximation algorithm, respectively while reaching the influence quality of the accurate algorithms with less memory.
 
 \end{itemize}
 
-% \fixme{The paper is organized as follows: 
-% In Section~\ref{sec:background}, we present 
-% the background on IM and introduce the mathematical notation. 
-% Section~\ref{sec:method} describes the proposed approach in detail.}
-% In Section~\ref{sec:evaluation}, a thorough performance evaluation \fixme{is provided by conducting experiments on various real-world datasets and influence settings. A detailed empirical comparison with the state-of-the-art from the literature is also given. Section~\ref{sec:relatedwork} presents a comparative overview of the existing work. Finally, Section~\ref{sec:conclusion} discusses future work and concludes the paper.}
+\fixme{The paper is organized as follows: 
+In Section~\ref{sec:background}, we present 
+the background on IM and introduce the mathematical notation. 
+Section~\ref{sec:method} describes the proposed approach in detail.}
+In Section~\ref{sec:evaluation}, a thorough performance evaluation \fixme{is provided by conducting experiments on various real-world datasets and influence settings. A detailed empirical comparison with the state-of-the-art from the literature is also given. Section~\ref{sec:relatedwork} presents a comparative overview of the existing work. Finally, Section~\ref{sec:conclusion} discusses future work and concludes the paper.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -154,18 +152,14 @@ Simulating a greedy algorithm in \fixme{parallel} is a \fixme{straightforward} w
         \hline
         Variable & Definition  \\
         \hline
-        %\kktodo{uzerinden 
-        %gecelim}\ggx{A ekledim, S' uygun olur mu karar veremedim.}\\
         $G = (V,E)$     & Graph $G$ with vertices $V$ and edges $E$ \\
         $N$ & Number of vertices\\
         $M$ & Number of edges\\
-        $T$ & Depth of the graph\\
+        % $T$ & Depth of the graph\\
         $\Gamma^+_G(u)$ & The set of vertices $v$ where $(u,v) \in E$ \\ %%FIXME
         $\Gamma^-_G(u)$  &The set of vertices $v$ where $(v, u) \in E$\\ %%FIXME
         $w_{u,v}$       & Probability of $u$ directly influencing $v$ \\
-        %$SCC(v) $       & Strongly connected component of vertex $v$\\
         $R_{G}(v)$      & Reachability set of vertex $v$ on graph $G$\\
-%        $\overline{R_{G}(v)} & Complement of the vertex set $R_{G}(v)$\\
         \hline\hline
         $S$             & Seed set to maximize influence\\
         $K$             & Size of the seed set\\
@@ -177,7 +171,7 @@ Simulating a greedy algorithm in \fixme{parallel} is a \fixme{straightforward} w
         $P(s,v)_r $     & Random probability generated for selecting edge vertices $s$ to $v$ in simulation $r$\\
         $h(u,v)$        & Hash function for edge $\{u,v\}$\\
         $h_{max}$       & Maximum value hash function $h$ can return\\
-        %$X_r$           & Random number/hash generated for simulation $r$  \\
+        $X_r$           & Random number/hash generated for simulation $r$  \\
         \hline\hline
         $e$             & Estimated reachability set size\\
         % $[a, \ldots, a]_B$      & Vector of size $B$, contains all $a$\\
@@ -391,10 +385,9 @@ where $||$ is the concatenation operator.
 % In our preliminary experiments, we have tried a set of hash algorithms and found that {\sc Crc32}~\cite{koopman200232} and {{\sc Murmur3}} are good candidates for {\sc Hash}. {{\sc Murmur3}} was slightly faster than {\sc Crc32} with better randomness properties. 
 % After a preliminary analysis, \fixme{we chose {{\sc Murmur3}} due to its simplicity and good avalanche behavior with a maximum bias $0.5\%$~\cite{MurmurHash3Performance}.} 
 
-% For undirected graphs, a symmetric hash function, i.e $h(u,v) = \mbox{{\sc Hash}}(min(u,v)||max(u,v))~mod~2^{31}$, can be used to produce the same sampling random value for both ends of the edge (u,v)\cite{infuser}.
+Besides Sketching and Error-Adaptive Rebuilding, one of the many differences between {\sc InFuseR}~\cite{infuser} and \acro is that {\sc InFuseR} only works on undirected graphs and uses a symmetric hash function, i.e. $h(u,v) = \mbox{{\sc Hash}}(min(u,v)||max(u,v))~mod~2^{31}$, to produce the same sampling random value for both ends of the edge (u,v). Whereas \acro only uses hash-based sampling to generate {\em reproducible random numbers} fast.
 
-
-An  important bottleneck of hash-based fused sampling is the need of the hash value for an edge whenever it is read from the memory. To mitigate its overhead, using $\Theta(|E|)$ more memory, we precompute and memoize the hash values (and read them when we need them). We have also tried recomputing the hash values every time they are needed; this incurred around $5\%$ slowdown. Since {\acro} is designed for multi-core servers, extra $\Theta(|E|)$ memory is a practical overhead. However, considering its low overhead, the recomputation strategy can be promising for memory-restricted accelerators and devices such as GPUs. 
+An important bottleneck of hash-based fused sampling is the need of the hash value for an edge whenever it is read from the memory. To mitigate its overhead, using $\Theta(|E|)$ more memory, we precompute and memoize the hash values (and read them when we need them). We have also tried recomputing the hash values every time they are needed; this incurred around $5\%$ slowdown. Since {\acro} is designed for multi-core servers, extra $\Theta(|E|)$ memory is a practical overhead. However, considering its low overhead, the recomputation strategy can be promising for memory-restricted accelerators and devices such as GPUs. 
 
 % Although the $h(.)$ function described above \fixme{generates a unique hash value for each edge, and hence can be used to generate a unique sampling probability, different simulations require different probabilities.} To enable this, 
 
@@ -410,7 +403,7 @@ The edge $(u,v)$ exists \fixme{in the sample $r$ if and only if  ${P}(u,v)_r$ is
 
 To estimate the cardinality of a reachability set, \acro{} performs a cheap diffusion process over the sample subgraphs by using a single sketch register for a single sample/simulation. 
 For an edge ($u, v$) in simulation $j$ where $v$ is a live vertex, an update, i.e., a merge operation, on $u$'s register is performed on the corresponding register $M_u$[$j$], i.e., $M_u[j] = max(M_u[j],M_v[j])$. 
-The toy example in Fig.~\ref{fig:fmops} with  ${\cal J} = 4$ shows how the sketch operations are done on a toy problem. In Fig.~\ref{fig:fmops}(a), the sketches, in a toy problem with 4 samples and 4-bit hash functions, are initialized; the id of vertex $u$ is hashed and leading zeros of the hash are written to registers. In Fig.~\ref{fig:fmops}(b), the merge operation is illustrated on registers of vertex $u$, $M_u$, and vertex $v$, $M_v$; merge operation takes element-wise maximum of registers to find union of the reachability sets. All these operations are performed using vectorized instructions. 
+The toy example with ${\cal J} = 4$ registers in Fig.~\ref{fig:fmops} shows how the sketch operations are done on a toy problem. In Fig.~\ref{fig:fmops}(a), the sketches, in a toy problem with 4 samples and 4-bit hash functions, are initialized; the id of vertex $u$ is hashed and leading zeros of the hash are written to registers. In Fig.~\ref{fig:fmops}(b), the merge operation is illustrated on registers of vertex $u$, $M_u$, and vertex $v$, $M_v$; merge operation takes element-wise maximum of registers to find union of the reachability sets. All these operations are performed using vectorized instructions. 
 
  To vectorize the rest of the process, we leverage conditional move operations. Although an edge ($u, v$) is inside the graph, it may not be in all the samples. In the toy example of Fig.~\ref{fig:fmops}, we assume that ($u, v$) only exists in the first and the last sample. 
  Fig.~\ref{fig:fmops}(c) writes the merged reachability sets back to $u$'s registers. For the first sample, $M_u[1]$ needs an update. The operations for the second and the third rows/samples are skipped since ($u, v$) does not exist in these samples. The fourth row shows the case with ($u$, $v$) is in the sample but $M_u[4] < M_v[4]$. Hence, the move operation is not needed. However, for such cases, we still perform this write as a part of the vectorized operation. This being said, we skip the whole Fig.~\ref{fig:fmops}(c) when ($u, v$) is not in any of these samples.   
@@ -1622,10 +1615,7 @@ Kumar and Calders~\cite{kumar2017information} proposed the Time Constrained Info
 \section{Conclusion and Future Work}\label{sec:conclusion}
 
 In this work, we propose a sketch-based Influence Maximization algorithm that employs fused sampling and a novel error-adaptive rebuilding strategy. We provide a fast implementation of the algorithm that utilizes multi-threading to exploit multiple cores. Also, we present a performance comparison with state-of-the-art IM algorithms on real-world datasets and show that \acro{} can be an order of magnitude faster while obtaining the same influence. 
-%With the proposed method, \acro can achieve $\maxspeedupSKIM\times$ speedup against a sketch-based algorithm {\sc Skim} and $\maxspeedupIMM\times$ speedup against an approximation-based algorithm {\sc Imm} while producing high-quality seed sets. 
-%\ggx{Bu kısım değişmeli}
-In the future, we will extend our work to a distributed GPU setting to process graphs with billions of vertices and edges under a minute. 
-%The main issue with \acro on such an architecture is the broadcast of sketch registers. When the vertices are partitioned into different computation units, resulting sketch updates should be communicated to all partitions. To overcome the issue and reduce communication bottlenecks, graph preprocessing and speculative diffusion strategies will be employed.
+In the future, we will extend our work to a distributed GPU setting to process graphs, with the aim of processing billions of vertices and edges in under a minute. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
