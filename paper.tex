@@ -117,7 +117,9 @@ Influence maximization is the problem of finding a subset $S \subset V$ of $K$ v
 Simulating a greedy algorithm in \fixme{parallel} is a \fixme{straightforward} workaround to reduce the execution time of IM kernels and make them scalable for large-scale networks. However, for large networks, a parallel, greedy approach with a good approximation guarantee does not come cheap on networks with billions of vertices and edges even if a large number of processing units/cores are available. Following similar attempts in the literature, we propose a parallel, sketch-based approach that approximates the Monte-Carlo processes. To boost the performance, the proposed approach does not exactly count the number of influenced vertices. Instead, it leverages Count-Distinct sketches. Below is a summary of our contributions:
 
 \begin{itemize} [leftmargin=0.3cm]
-\item \fixme{We propose \acro\footnote{\scriptsize{\url{https://github.com/ggokturk/infuser}}}, an open-source, blazing-fast, sketch-based and accurate Influence Maximization algorithm.} The proposed scheme samples the edges as they are traversed across several simulations. Thus, sampling, diffusion, and count-distinct processes are fused for all simulations. 
+\item \fixme{We propose \acro\footnote{\scriptsize{\url{https://github.com/ggokturk/infuser}}}, an open-source, blazing-fast, error-adaptive, sketch-based Influence Maximization algorithm.} The proposed scheme removes the contamination of sketches in. Error-adaptive sketch rebuilding strategy we employed lets the algorithm rebuild sketches only when necessary, allowing substantial performance gains while retaining high-quality results.  
+
+\item The edges are sampled as they are traversed across several simulations. Thus, sampling, diffusion, and count-distinct processes are fused for all simulations. 
 
 \item \fixme{Running concurrent simulations} on per-vertex Count-Distinct sketches reduces the number of memory accesses which is the main bottleneck for many graph kernels in the literature. While traversing an edge, \acro concurrently performs multiple diffusion simulations while using only a single (8-bit) value per vertex for each simulation. 
 
@@ -279,25 +281,40 @@ If disjoints sets are used for storing reachability sets; $\mathcal{O}(n{\sigma}
 memory is required to store all reachability sets, and each merge operation has $\mathcal{O}({\tt Ack}(\sigma))$ complexity where ${\tt Ack}$ is the Ackermann~\cite{ackermann} function. %\kktodo{bu Ackermann'a atif verelim}.\ggx{done.}
 
 
-Count-Distinct~Sketches can be leveraged to estimate a reachability set's cardinality efficiently; for instance, the Flajolet–Martin~(FM) sketch~\cite{flajolet1985probabilistic} uses a constant number, ${\cal J}$, of registers where ${\cal J}$ can be increased for better estimates. Furthermore, the union of two sketches can be computed in constant time which is a necessary property for an efficient estimation of reachability set cardinalities. The essence of an FM sketch is that it keeps track of how rare the elements are in a stream. The rarity of the stream is estimated by counting the maximum number of leading zeros in the stream elements' hash values. Initially, each register is initialized with zero. The items are hashed one by one, and the length of the longest all-zero prefix is stored in the register. With a single register, the cardinality estimation can be done by computing the power $2^r$ where $r$ is the value in the register.
+Count-Distinct~Sketches can be leveraged to estimate a reachability set's cardinality efficiently; for instance, the Flajolet–Martin~(FM) sketch~\cite{flajolet1985probabilistic} uses a constant number, ${\cal J}$, of registers where ${\cal J}$ can be increased for better estimates. Furthermore, the union of two sketches can be computed in constant time which is a necessary property for an efficient estimation of reachability set cardinalities. The essence of an FM sketch is that it keeps track of how rare the elements are in a stream. The rarity of the stream is estimated by counting the maximum number of leading zeros in the stream elements' hash values. In this work, we utilize a variant of the Flajolet–Martin sketch; since multiple Monte-Carlo simulations are performed to calculate the estimated influence. We use one register per simulation and take the average length of the longest leading zeros to estimate cardinalities for reachability sets. 
+
+\subsubsection{Initialization}
+FM sketches initialize each register to zero in the beginning. Since every vertices reachability set includes itself at zero distance, we immediately add the vertices to its sketches. The vertices are hashed one by one, and the length of the longest all-zero prefix is stored in the register. Initialization for vertex $u$'s register can be formulated as following:
+\begin{equation}
+    \label{eq:sketch-add}
+    M_u[j] = clz(h_j(u)),~1 \leq j \leq {\cal J}
+\end{equation} where $clz(y)$ returns the number of leading zeros in $y$, $h_j$ is the $j$th hash function, and ${\cal J}$ is the number of sketch registers.
+
+
+\subsubsection{Adding Items}
 
 In practice, multiple, ${\mathcal J}$, registers and hash values, $M[j]$ and $h_j$, $1 \leq j \leq {\cal J}$, are used to reduce the variance of the estimation. For a sketch with multiple registers, the impact of adding an item $x \in \cal{U}$ is shown in~\eqref{eq:sketch-add}:
 \begin{equation}
     \label{eq:sketch-add}
     M[j] = \max(M[j], clz(h_j(x)),~1 \leq j \leq {\cal J}
-\end{equation} where $clz(y)$ returns the number of leading zeros in $y$ and ${\cal J}$ is the number of sketch registers. With multiple registers, the average of the register values can be used to estimate the cardinality, and the result is divided to a correction factor $\phi \approx 0.77351$ to fix the error due to hash collisions. That is the estimated cardinality $e$ is computed as
+\end{equation} where $clz(y)$ returns the number of leading zeros in $y$ and ${\cal J}$ is the number of sketch registers.
+
+\subsubsection{Union}
+Two given FM sketches $M_u$ and $M_v$ can be merged, i.e., their union $M_{uv}$ can be computed by taking the pairwise maximums of their registers. Formally; 
+\begin{equation}
+\label{eq:sketch-merge}
+    M_{uv}[j] = \max(M_u[j], M_v[j]),~1 \leq j \leq {\cal J}.
+\end{equation} 
+In our implementation, the merge operations are performed if and only if there is a sampled edge between the vertices. The union operation requires constant number($\mathcal{O}(J)$ operations for any size set. 
+
+
+\subsubsection{Cardinality Estimation}
+With a single register, the cardinality estimation can be done by computing the power $2^r$ where $r$ is the value in the register and applying a correction factor. With multiple registers, the average of the register values can be used to estimate the cardinality, and the result is divided by a correction factor $\phi$ to fix the error due to hash collisions. Flajolet et al. \cite{flajolet1985probabilistic} suggests $\phi \approx 0.77351$ for $\mathcal{J}>=16$ registers. The estimated cardinality $e$ is computed as
 \begin{equation}
     \label{eq:sketch-estimate}
     e = 2^{\bar{M}}/\phi
 \end{equation} 
 where $\bar{M} = {\tt{avg}}_j\{M[j]\}$ is the mean of the register values.
-
-In this work, we utilize a variant of Flajolet–Martin sketch; since multiple Monte-Carlo simulations are performed to calculate the estimated influence, we use one register per simulation and take the average length of the longest leading zeros. Two given FM sketches $M_u$ and $M_v$ can be merged, i.e., their union $M_{uv}$ can be computed by taking the pairwise maximums of their registers. Formally; 
-\begin{equation}
-\label{eq:sketch-merge}
-    M_{uv}[j] = \max(M_u[j], M_v[j]),~1 \leq j \leq {\cal J}.
-\end{equation} 
-In our implementation, the merge operations are performed if and only if there is a sampled edge between the vertices. %\kktodo{burada simulations yaziyordu, anlamadim, iki simulation arasinda nasil edge olur - o yuzden vertex yazdim}. \ggx{ j'th sampleda vertexler arasında sampled edge olmasını kastetmiştim. Yanlis olmus.}  
 
 
 \section{Error-Adaptive Influence Maximization}\label{sec:method}
@@ -373,7 +390,11 @@ In \acro, when an edge of the original graph is being processed, it is processed
 where $||$ is the concatenation operator. 
 % In our preliminary experiments, we have tried a set of hash algorithms and found that {\sc Crc32}~\cite{koopman200232} and {{\sc Murmur3}} are good candidates for {\sc Hash}. {{\sc Murmur3}} was slightly faster than {\sc Crc32} with better randomness properties. 
 % After a preliminary analysis, \fixme{we chose {{\sc Murmur3}} due to its simplicity and good avalanche behavior with a maximum bias $0.5\%$~\cite{MurmurHash3Performance}.} 
-An  important bottleneck of hash-based fused sampling is the need of the hash value for an edge whenever it is read from the memory. To mitigate its overhead, using $\Theta(|E|)$ more memory, we precompute and memoize the hash values (and read them when we need them). We have also tried recomputing the hash values every time they are needed; this incurred around $5\%$ slowdown. Since {\acro} is designed for multi-core servers, extra $\Theta(|E|)$ memory is a practical overhead. However, considering its low overhead, the recomputation strategy can be promising for memory-restricted accelerators and devices such as GPUs.
+
+% For undirected graphs, a symmetric hash function, i.e $h(u,v) = \mbox{{\sc Hash}}(min(u,v)||max(u,v))~mod~2^{31}$, can be used to produce the same sampling random value for both ends of the edge (u,v)\cite{infuser}.
+
+
+An  important bottleneck of hash-based fused sampling is the need of the hash value for an edge whenever it is read from the memory. To mitigate its overhead, using $\Theta(|E|)$ more memory, we precompute and memoize the hash values (and read them when we need them). We have also tried recomputing the hash values every time they are needed; this incurred around $5\%$ slowdown. Since {\acro} is designed for multi-core servers, extra $\Theta(|E|)$ memory is a practical overhead. However, considering its low overhead, the recomputation strategy can be promising for memory-restricted accelerators and devices such as GPUs. 
 
 % Although the $h(.)$ function described above \fixme{generates a unique hash value for each edge, and hence can be used to generate a unique sampling probability, different simulations require different probabilities.} To enable this, 
 
@@ -382,33 +403,9 @@ A set of uniformly \fixme{ randomly chosen numbers $X_r \in_R [0, h_{max}]$ } as
     \label{eq:hash_prob}
     P(u,v)_r = \frac{X_r \oplus h(u,v)}{h_{max}}.
 \end{equation}
-% The edge $\{u,v\}$ is verified to be in the sample if ${\rho}(u,v)_r$ is smaller than or equal to the threshold $w_{u,v}$. 
+
 The edge $(u,v)$ exists \fixme{in the sample $r$ if and only if  ${P}(u,v)_r$ is smaller than the edge threshold $w_{u,v}$.} One of this approach's benefits is that an edge can be sampled using \fixme{a single XOR and compare-greater-than operation} which is crucial since \acro{} recomputes this probability value each time the corresponding edge is read from the memory. In practice, we do not apply the division operation since $h_{max}$ is a constant value and the same for every edge and simulation. Moreover, the corresponding control flow branch overhead can be \fixme{removed} using {\em conditional move} \fixme{instructions}. 
 
-% \begin{figure}[!ht] 
-%     \centering
-%     \includegraphics[width=0.8\linewidth]{./images/CDF.pdf}
-%     \caption{\small{Cumulative probability function of hash-based sampling probabilities on various real-life networks.}}
-%     \label{fig:prob-cdf} 
-% \end{figure}
-
-% Using a strong hash function such as {{\sc Murmur3}} ensures that all bits independently change if the input is changed. This property allows us to generate good-enough pseudo-random values for fair sampling. To evaluate the randomness and fairness of the values generated with the hash-based approach, we generated a large number of samples for various real-life networks and plotted the cumulative distribution.
-% and the bias of the random values $P(u,v)_r$ used~(Fig.~\ref{fig:prob-bias}). 
-% As Figure~\ref{fig:prob-cdf} shows, the sampling distribution of the hash-based computation values resembles a uniform random distribution. 
-% Furthermore, the latter shows that the bias is insignificant for each network. 
-
-% \begin{figure}[!ht] 
-%     \centering
-%     \includegraphics[width=1\linewidth]{./images/bias.pdf}
-%     \caption{\small{Bias distribution of hash-based sampling probabilities on various real-life networks.}}
-%     \label{fig:prob-bias} 
-% \end{figure}
-
-% For a given graph $G = (V,E)$, the bias of a sampling probability $x$ is computed as $|(31/2) − E(|H(m)|) / E(|H(m)|))|$ for all $(u,v) \in E$ and $0 \leq r < R$. 
-% Figure~\ref{fig:prob-bias} shows the bias for 12 real-life networks. 
-%Traditional implementations sample each edge in $G$ once per simulation and store them to construct a sampled subgraph. n
-%Being able to generate the samples on the fly allows us to avoid many memory accesses. 
-% One of the downsides of hash-based fused sampling is that we have to generate all these random values,  $P(u,v)_r$, for each edge traversal and each simulation $r$. As mentioned above, the edges' hash values are precomputed for all the edges in $E$ to reduce computation cost and leverage fused sampling's performance gains. %Fortunately, the rest of the operations, i.e., one XOR and one division, are very fast on modern computing hardware. %The trade-off between extra memory and computation here maybe not be applicable for different computation architectures and faster/simpler hash functions.
 \subsection{Estimating Reachability Set Cardinalities}
 
 To estimate the cardinality of a reachability set, \acro{} performs a cheap diffusion process over the sample subgraphs by using a single sketch register for a single sample/simulation. 
